@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LOGIX // FREIGHT — Heavy-truck logistics, engineered</title>
+<meta name="description" content="Autonomous-ready heavy-truck fleet, live telematics and a global freight network.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+  tailwind.config = {
+    corePlugins: { preflight: true },
+    theme: { extend: {
+      fontFamily: {
+        sans: ['Archivo', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+      }
+    } }
+  };
+</script>
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#ECEDE8; --bg-2:#E2E4DE; --surface:#F7F7F4; --surface-2:#FFFFFF;
+  --ink:#141618; --ink-2:#394046; --muted:#646B73;
+  --line:rgba(20,22,24,.14); --line-2:rgba(20,22,24,.26); --grid:rgba(20,22,24,.06);
+  --accent:#C8FF2E; --accent-ink:#4A6A00; --on-accent:#11140A; --wire:#4A6A00;
+  --map-dot:rgba(20,22,24,.22); --glow:rgba(120,170,0,.25);
+  --nav-bg:rgba(247,247,244,.78);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1012; --bg-2:#131619; --surface:#181B1F; --surface-2:#1E2227;
+    --ink:#F1F2EE; --ink-2:#C4C8CC; --muted:#8C939B;
+    --line:rgba(241,242,238,.11); --line-2:rgba(241,242,238,.22); --grid:rgba(241,242,238,.045);
+    --accent:#C8FF2E; --accent-ink:#C8FF2E; --on-accent:#11140A; --wire:#C8FF2E;
+    --map-dot:rgba(241,242,238,.17); --glow:rgba(200,255,46,.35);
+    --nav-bg:rgba(20,23,26,.72);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1012; --bg-2:#131619; --surface:#181B1F; --surface-2:#1E2227;
+  --ink:#F1F2EE; --ink-2:#C4C8CC; --muted:#8C939B;
+  --line:rgba(241,242,238,.11); --line-2:rgba(241,242,238,.22); --grid:rgba(241,242,238,.045);
+  --accent:#C8FF2E; --accent-ink:#C8FF2E; --on-accent:#11140A; --wire:#C8FF2E;
+  --map-dot:rgba(241,242,238,.17); --glow:rgba(200,255,46,.35);
+  --nav-bg:rgba(20,23,26,.72);
+  color-scheme: dark;
+}
+
+/* ============ BASE ============ */
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ scroll-behavior:smooth; scroll-padding-top:calc(env(safe-area-inset-top,0px) + 96px); }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Archivo','Helvetica Neue',Arial,sans-serif; font-stretch:100%;
+  font-size:17px; line-height:1.55; -webkit-font-smoothing:antialiased; overflow-x:clip;
+}
+img,svg{ max-width:100%; }
+.mono{ font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; }
+.wrap{ width:100%; max-width:1320px; margin:0 auto; padding-left:clamp(20px,4vw,48px); padding-right:clamp(20px,4vw,48px); }
+.gridbg{
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:48px 48px;
+}
+:focus-visible{ outline:2px solid var(--accent-ink); outline-offset:3px; border-radius:6px; }
+::selection{ background:var(--accent); color:var(--on-accent); }
+
+/* ============ TYPE ============ */
+.display{
+  font-stretch:125%; font-weight:850; text-transform:uppercase;
+  font-size:clamp(2.35rem, 6.6vw, 6.4rem); line-height:.9; letter-spacing:-.02em; margin:0;
+}
+.h2{ font-stretch:118%; font-weight:780; font-size:clamp(1.9rem,3.8vw,3.3rem); line-height:1; letter-spacing:-.015em; margin:0; }
+.h3{ font-stretch:110%; font-weight:700; font-size:1.3rem; line-height:1.15; margin:0; }
+.lede{ color:var(--ink-2); max-width:34em; }
+.tech{ font-family:'IBM Plex Mono',monospace; font-size:.78rem; letter-spacing:.02em; color:var(--muted); }
+.tech b{ color:var(--accent-ink); font-weight:500; }
+.section{ padding:clamp(80px,11vw,150px) 0; position:relative; }
+.sec-head{ display:grid; gap:20px; grid-template-columns:1fr; margin-bottom:clamp(36px,5vw,64px); }
+@media (min-width:900px){ .sec-head{ grid-template-columns:1.1fr .9fr; align-items:end; } }
+.sec-code{ font-family:'IBM Plex Mono',monospace; font-size:.8rem; color:var(--accent-ink); margin-bottom:14px; display:block; }
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-flex; align-items:center; gap:10px; height:46px; padding:0 20px;
+  border-radius:999px; font-weight:650; font-size:.95rem; font-stretch:108%; text-decoration:none;
+  border:1px solid transparent; cursor:pointer; transition:transform .2s ease, background .2s ease, box-shadow .25s ease, border-color .2s;
+  white-space:nowrap;
+}
+.btn-accent{ background:var(--accent); color:var(--on-accent); box-shadow:0 0 0 0 var(--glow); }
+.btn-accent:hover{ transform:translateY(-1px); box-shadow:0 8px 28px -6px var(--glow), 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+.btn-accent:active{ transform:translateY(0) scale(.98); }
+.btn-ghost{ background:transparent; color:var(--ink); border-color:var(--line-2); }
+.btn-ghost:hover{ border-color:var(--ink); background:color-mix(in srgb, var(--ink) 5%, transparent); }
+.btn-sm{ height:38px; padding:0 16px; font-size:.86rem; }
+.btn .kbd{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; opacity:.7; }
+
+/* ============ NAV ============ */
+.nav-shell{ position:fixed; top:0; left:0; right:0; z-index:50; padding-top:calc(env(safe-area-inset-top,0px) + 14px); pointer-events:none; }
+.nav{
+  pointer-events:auto; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  height:60px; padding:0 8px 0 18px; border-radius:16px;
+  background:var(--nav-bg); border:1px solid var(--line);
+  backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4);
+  transition:box-shadow .3s, border-color .3s;
+}
+.nav.scrolled{ box-shadow:0 12px 40px -18px rgba(0,0,0,.45); border-color:var(--line-2); }
+.logo{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); }
+.logo-word{ font-stretch:125%; font-weight:850; font-size:1.02rem; letter-spacing:-.01em; }
+.logo-word span{ color:var(--accent-ink); font-weight:500; font-family:'IBM Plex Mono',monospace; font-stretch:100%; margin:0 2px; }
+.nav-links{ display:none; gap:4px; }
+.nav-links a{ color:var(--ink-2); text-decoration:none; font-size:.9rem; font-weight:520; padding:8px 12px; border-radius:10px; position:relative; transition:color .2s, background .2s; }
+.nav-links a:hover{ color:var(--ink); background:color-mix(in srgb, var(--ink) 6%, transparent); }
+.nav-links a.active{ color:var(--ink); }
+.nav-links a.active::after{ content:""; position:absolute; left:12px; right:12px; bottom:3px; height:2px; background:var(--accent); border-radius:2px; }
+.nav-actions{ display:flex; align-items:center; gap:8px; }
+.icon-btn{ width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:transparent; border:1px solid var(--line); color:var(--ink); cursor:pointer; transition:background .2s, border-color .2s; }
+.icon-btn:hover{ border-color:var(--line-2); background:color-mix(in srgb, var(--ink) 5%, transparent); }
+.portal-btn, .quote-btn{ display:none; }
+@media (min-width:1080px){ .nav-links{ display:flex; } .menu-btn{ display:none; } }
+@media (min-width:640px){ .portal-btn, .quote-btn{ display:inline-flex; } }
+.mobile-menu{
+  pointer-events:auto; margin-top:8px; border-radius:16px; background:var(--surface); border:1px solid var(--line);
+  padding:10px; display:grid; gap:2px; transform-origin:top; transition:opacity .2s, transform .2s;
+}
+.mobile-menu[hidden]{ display:none; }
+.mobile-menu a{ color:var(--ink); text-decoration:none; padding:14px 12px; border-radius:10px; font-weight:600; font-stretch:112%; display:flex; justify-content:space-between; }
+.mobile-menu a:hover{ background:var(--bg-2); }
+.mobile-menu .tech{ align-self:center; }
+
+/* ============ HERO / 360° RIG ============ */
+.rig{ position:relative; height:430vh; }
+.rig-sticky{ position:sticky; top:0; height:100vh; height:100svh; overflow:hidden; }
+.rig-sticky::before{ content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(55% 45% at 50% 64%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 70%); }
+.rig-canvas{ position:absolute; inset:0; touch-action:pan-y; cursor:grab; outline:none; }
+.rig-canvas.dragging{ cursor:grabbing; }
+.rig-canvas canvas{ display:block; width:100%; height:100%; }
+.rig-canvas:focus-visible{ box-shadow:inset 0 0 0 2px var(--accent-ink); }
+.rig-head{ position:absolute; left:0; right:0; top:calc(env(safe-area-inset-top,0px) + 104px); pointer-events:none; will-change:opacity,transform; z-index:2; }
+.rig-head .inner{ display:grid; gap:18px; }
+@media (min-width:1000px){ .rig-head .inner{ grid-template-columns:1fr 330px; align-items:end; gap:48px; } }
+.rig-head a, .rig-head button{ pointer-events:auto; }
+.rig .display{ font-size:clamp(2.05rem, 5.1vw, 5.1rem); }
+@media (max-width:999px){ .rig-head .lede{ display:none; } }
+.status-pill{ display:inline-flex; align-items:center; gap:10px; padding:6px 12px 6px 8px; border:1px solid var(--line); border-radius:999px; font-family:'IBM Plex Mono',monospace; font-size:.75rem; color:var(--ink-2); background:color-mix(in srgb, var(--surface) 60%, transparent); margin-bottom:22px; }
+.dot-live{ width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 0 var(--glow); animation:ping 2s infinite; }
+@keyframes ping{ 0%{ box-shadow:0 0 0 0 var(--glow);} 70%{ box-shadow:0 0 0 8px transparent;} 100%{ box-shadow:0 0 0 0 transparent;} }
+
+.rig-cue{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 26px); transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:10px; pointer-events:none; z-index:2; }
+.rig-cue i{ width:1px; height:34px; background:linear-gradient(var(--accent-ink), transparent); animation:cue 1.8s ease-in-out infinite; transform-origin:top; }
+@keyframes cue{ 0%{ transform:scaleY(0);} 50%{ transform:scaleY(1);} 100%{ transform:scaleY(1); opacity:0; } }
+
+.rig-hud{ position:absolute; left:0; right:0; bottom:calc(env(safe-area-inset-bottom,0px) + 18px); opacity:0; transition:opacity .4s; pointer-events:none; z-index:3; }
+.rig-hud.on{ opacity:1; }
+.rig-hud .inner{ display:flex; align-items:flex-end; justify-content:space-between; gap:14px 20px; flex-wrap:wrap; }
+.hud-read{ min-width:150px; }
+.hud-read .v{ font-weight:500; font-size:1.5rem; line-height:1.1; color:var(--ink); font-variant-numeric:tabular-nums; margin-top:4px; }
+.views{ display:flex; gap:4px; padding:4px; border-radius:12px; background:color-mix(in srgb, var(--surface) 82%, transparent); border:1px solid var(--line); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.rig-hud.on .views{ pointer-events:auto; }
+.views button{ border:0; background:transparent; color:var(--ink-2); font:500 .76rem 'IBM Plex Mono',monospace; padding:8px 12px; border-radius:9px; cursor:pointer; transition:background .2s, color .2s; }
+.views button:hover{ color:var(--ink); }
+.views button.on{ background:var(--ink); color:var(--bg); }
+.hud-bar{ height:2px; background:var(--line-2); border-radius:2px; margin-top:8px; overflow:hidden; }
+.hud-bar i{ display:block; height:100%; width:0; background:var(--accent-ink); }
+@media (max-width:640px){ .hud-hint{ display:none; } .hud-read{ min-width:0; } .hud-read .v{ font-size:1.15rem; } .views button{ padding:7px 9px; } }
+
+.callouts{ position:absolute; inset:0; pointer-events:none; z-index:2; }
+.callouts svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.callouts line{ stroke:var(--accent-ink); stroke-width:1; }
+.co{ position:absolute; left:0; top:0; }
+.co-dot{ position:absolute; left:0; top:0; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; border:1.5px solid var(--accent-ink); background:color-mix(in srgb, var(--bg) 55%, transparent); pointer-events:auto; cursor:pointer; padding:0; }
+.co-dot::after{ content:""; position:absolute; inset:5px; border-radius:50%; background:var(--accent); }
+.co-dot::before{ content:""; position:absolute; inset:-6px; border-radius:50%; border:1px solid var(--accent-ink); animation:ring 2.4s infinite; }
+.co-card{ position:absolute; left:0; top:0; width:196px; padding:10px 12px; border-radius:12px; text-align:left; font:inherit; color:var(--ink);
+  background:color-mix(in srgb, var(--surface) 88%, transparent); border:1px solid var(--line-2);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); pointer-events:auto; cursor:pointer; transition:border-color .2s; }
+.co-card:hover, .co.open .co-card{ border-color:var(--accent-ink); }
+.co-card b{ display:block; font-stretch:112%; font-weight:700; font-size:.9rem; line-height:1.2; }
+.co-card .tech{ display:block; font-size:.7rem; margin-top:3px; }
+.co-desc{ display:block; max-height:0; overflow:hidden; font-size:.8rem; line-height:1.45; color:var(--ink-2); transition:max-height .35s ease, margin .35s ease; }
+.co.open .co-desc{ max-height:140px; margin-top:8px; }
+.co.off, .co.off *{ pointer-events:none !important; }
+@media (max-width:640px){ .co-card{ width:150px; padding:8px 10px; } .co-card b{ font-size:.8rem; } .co-card .tech{ font-size:.64rem; } }
+@keyframes ring{ 0%{ transform:scale(.7); opacity:.7;} 100%{ transform:scale(1.5); opacity:0;} }
+
+/* SVG truck (technology section + no-WebGL fallback) */
+.p-rib{ stroke:rgba(255,255,255,.055); stroke-width:2; }
+.p-livery{ font-family:'Archivo',sans-serif; font-stretch:125%; font-weight:850; font-size:34px; letter-spacing:-.5px; }
+.p-seam{ stroke:rgba(0,0,0,.25); stroke-width:1.5; fill:none; }
+.p-gear{ stroke:#4A5057; stroke-width:5; fill:none; stroke-linecap:round; }
+.p-spoke{ stroke:#2A2F34; stroke-width:3; }
+.t-wire *{ fill:none !important; stroke:var(--wire); stroke-width:1.15; vector-effect:non-scaling-stroke; }
+.ground{ height:1px; background:linear-gradient(90deg, transparent, var(--line-2) 15%, var(--line-2) 85%, transparent); margin-top:-2px; }
+.fleet-sec{ padding:clamp(30px,4vw,56px) 0 0; }
+.fleet-sec .fleet-band{ margin-top:0; }
+
+/* fleet band */
+.fleet-band{ display:grid; grid-template-columns:repeat(2,1fr); border-top:1px solid var(--line); margin-top:clamp(40px,5vw,64px); }
+@media (min-width:900px){ .fleet-band{ grid-template-columns:repeat(4,1fr); } }
+.fleet-cell{ padding:22px 20px 26px 0; border-bottom:1px solid var(--line); }
+@media (min-width:900px){ .fleet-cell{ border-bottom:0; padding-right:24px; } .fleet-cell + .fleet-cell{ padding-left:24px; border-left:1px solid var(--line); } }
+.fleet-cell:nth-child(even){ padding-left:20px; border-left:1px solid var(--line); }
+@media (min-width:900px){ .fleet-cell:nth-child(even){ padding-left:24px; } }
+.fleet-num{ font-stretch:122%; font-weight:780; font-size:clamp(1.6rem,2.6vw,2.2rem); line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+
+/* ============ SERVICES ============ */
+.svc-list{ border-top:1px solid var(--line-2); }
+.svc{ display:grid; grid-template-columns:1fr; gap:6px 32px; padding:26px 0 26px 22px; border-bottom:1px solid var(--line); position:relative; transition:background .25s; }
+.svc::before{ content:""; position:absolute; left:0; top:26px; bottom:26px; width:3px; border-radius:3px; background:var(--line-2); transition:background .25s, top .25s, bottom .25s; }
+.svc:hover::before, .svc:focus-within::before{ background:var(--accent); top:14px; bottom:14px; }
+.svc:hover{ background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%); }
+@media (min-width:900px){ .svc{ grid-template-columns:minmax(260px,1fr) 1.4fr 200px; align-items:baseline; } }
+.svc-name{ font-stretch:115%; font-weight:720; font-size:1.35rem; line-height:1.15; }
+.svc p{ margin:0; color:var(--ink-2); max-width:44em; }
+
+/* ============ BLUEPRINT ============ */
+.bp{ display:grid; gap:0; border:1px solid var(--line-2); border-radius:22px; overflow:hidden; background:var(--surface); }
+@media (min-width:1000px){ .bp{ grid-template-columns:360px 1fr; } }
+.bp-panel{ padding:26px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:22px; }
+@media (min-width:1000px){ .bp-panel{ border-bottom:0; border-right:1px solid var(--line); } }
+.tabs{ display:flex; gap:6px; padding:4px; border-radius:12px; background:var(--bg-2); flex-wrap:wrap; }
+.tab{ flex:1 1 auto; border:0; background:transparent; color:var(--ink-2); font:500 .78rem 'IBM Plex Mono',monospace; padding:9px 10px; border-radius:9px; cursor:pointer; transition:background .2s,color .2s; white-space:nowrap; }
+.tab:hover{ color:var(--ink); }
+.tab[aria-selected="true"]{ background:var(--surface-2); color:var(--ink); box-shadow:0 1px 0 var(--line), 0 0 0 1px var(--line); }
+.spec{ display:grid; grid-template-columns:1fr auto; align-items:baseline; gap:8px; padding:11px 0; border-bottom:1px dashed var(--line); font-family:'IBM Plex Mono',monospace; font-size:.82rem; }
+.spec:last-child{ border-bottom:0; }
+.spec dt{ color:var(--muted); }
+.spec dd{ margin:0; color:var(--ink); font-weight:500; text-align:right; font-variant-numeric:tabular-nums; }
+.spec dd small{ color:var(--muted); font-weight:400; margin-left:4px; }
+.sys{ font-family:'IBM Plex Mono',monospace; font-size:.74rem; color:var(--muted); line-height:1.75; border-top:1px solid var(--line); padding-top:16px; min-height:7.5em; }
+.sys .ok{ color:var(--accent-ink); }
+.bp-canvas{ position:relative; min-height:280px; background-color:var(--bg); }
+.bp-canvas .gridbg{ position:absolute; inset:0; background-size:24px 24px; }
+.bp-canvas .gridbg::after{ content:""; position:absolute; inset:0;
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:120px 120px; }
+.bp-svg{ position:relative; width:100%; height:auto; display:block; }
+.bp-svg .s{ fill:none; stroke:var(--wire); stroke-width:1.3; vector-effect:non-scaling-stroke; }
+.bp-svg .s2{ fill:none; stroke:var(--wire); stroke-width:1; opacity:.5; vector-effect:non-scaling-stroke; }
+.bp-svg .dim{ fill:none; stroke:var(--muted); stroke-width:1; vector-effect:non-scaling-stroke; }
+.bp-svg .fillw{ fill:color-mix(in srgb, var(--wire) 7%, transparent); }
+.bp-svg text{ font-family:'IBM Plex Mono',monospace; font-size:12px; fill:var(--muted); }
+.bp-svg text.hl{ fill:var(--ink); font-weight:500; }
+.draw{ stroke-dasharray:1; stroke-dashoffset:1; animation:draw 1.1s cubic-bezier(.6,0,.2,1) forwards; }
+@keyframes draw{ to{ stroke-dashoffset:0; } }
+.fadein{ opacity:0; animation:fi .5s ease forwards; }
+@keyframes fi{ to{ opacity:1; } }
+.bp-corner{ position:absolute; font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--muted); }
+
+/* ============ HOTSPOTS ============ */
+.tech-wrap{ display:grid; gap:28px; }
+@media (min-width:1000px){ .tech-wrap{ grid-template-columns:1fr 380px; align-items:center; gap:40px; } }
+.hs-stage{ position:relative; padding:40px 0 20px; }
+.hs-track{ position:relative; width:100%; aspect-ratio:1000/300; }
+.hs-track svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.hotspot{
+  position:absolute; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%;
+  background:color-mix(in srgb, var(--bg) 60%, transparent); border:1.5px solid var(--accent-ink); color:var(--accent-ink);
+  display:grid; place-items:center; cursor:pointer; transition:transform .2s, background .2s;
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+}
+.hotspot::before{ content:""; position:absolute; inset:-7px; border-radius:50%; border:1px solid var(--accent-ink); opacity:.5; animation:ring 2.4s infinite; }
+@keyframes ring{ 0%{ transform:scale(.7); opacity:.7;} 100%{ transform:scale(1.5); opacity:0;} }
+.hotspot:hover{ transform:scale(1.1); }
+.hotspot[aria-pressed="true"]{ background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+.hotspot svg{ width:14px; height:14px; transition:transform .25s; }
+.hotspot[aria-pressed="true"] svg{ transform:rotate(45deg); }
+.hs-tag{ position:absolute; transform:translate(-50%, -52px); font-family:'IBM Plex Mono',monospace; font-size:.68rem; white-space:nowrap; color:var(--ink-2); pointer-events:none; display:none; }
+@media (min-width:760px){ .hs-tag{ display:block; } }
+.hs-panel{ border:1px solid var(--line-2); border-radius:22px; background:var(--surface); padding:26px; min-height:330px; display:flex; flex-direction:column; }
+.hs-panel .meter{ height:4px; border-radius:4px; background:var(--bg-2); overflow:hidden; margin-top:8px; }
+.hs-panel .meter i{ display:block; height:100%; width:0; background:var(--accent); transition:width .8s cubic-bezier(.3,.7,.2,1); }
+.hs-nav{ display:flex; gap:6px; margin-top:auto; padding-top:22px; }
+.hs-nav button{ flex:1; height:6px; border-radius:6px; border:0; background:var(--line-2); cursor:pointer; padding:0; transition:background .2s; }
+.hs-nav button[aria-current="true"]{ background:var(--accent-ink); }
+.swap{ animation:swap .35s ease; }
+@keyframes swap{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none;} }
+
+/* ============ NETWORK ============ */
+.net{ border:1px solid var(--line-2); border-radius:22px; overflow:hidden; background:var(--surface); }
+.net-top{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+.chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.chip{ border:1px solid var(--line-2); background:transparent; color:var(--ink-2); font:500 .76rem 'IBM Plex Mono',monospace; padding:7px 12px; border-radius:999px; cursor:pointer; transition:all .2s; }
+.chip:hover{ color:var(--ink); border-color:var(--ink-2); }
+.chip[aria-pressed="true"]{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.map-box{ position:relative; background:var(--bg); overflow-x:auto; }
+.map-svg{ display:block; width:100%; min-width:560px; height:auto; }
+.map-svg .land{ fill:var(--map-dot); }
+.map-svg .route{ fill:none; stroke:var(--wire); stroke-width:1.3; stroke-dasharray:5 6; vector-effect:non-scaling-stroke; transition:opacity .4s; animation:dash 1.6s linear infinite; }
+.map-svg .route.ghost{ opacity:.1; }
+@keyframes dash{ to{ stroke-dashoffset:-22; } }
+.map-svg .hub circle.core{ fill:var(--accent); stroke:var(--bg); stroke-width:1.5; }
+.map-svg .hub circle.halo{ fill:var(--accent); opacity:.18; }
+.map-svg .hub text{ font-family:'IBM Plex Mono',monospace; font-size:10px; fill:var(--ink-2); }
+.map-svg .hub.ghost{ opacity:.25; }
+.map-svg .pkt{ fill:var(--ink); }
+.net-stats{ display:grid; grid-template-columns:repeat(2,1fr); border-top:1px solid var(--line); }
+@media (min-width:900px){ .net-stats{ grid-template-columns:repeat(4,1fr); } }
+.net-stat{ padding:18px 18px 20px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+.net-stat:nth-child(2n){ border-right:0; }
+@media (min-width:900px){ .net-stat{ border-bottom:0; } .net-stat:nth-child(2n){ border-right:1px solid var(--line);} .net-stat:last-child{ border-right:0; } }
+.net-stat .v{ font-stretch:120%; font-weight:760; font-size:1.7rem; line-height:1.1; font-variant-numeric:tabular-nums; margin-top:6px; }
+.feed{ font-family:'IBM Plex Mono',monospace; font-size:.74rem; color:var(--muted); padding:12px 16px; border-top:1px solid var(--line); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.feed b{ color:var(--accent-ink); font-weight:500; }
+
+/* ============ PROOF ============ */
+.stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:0; border-top:1px solid var(--line-2); }
+@media (min-width:900px){ .stats{ grid-template-columns:repeat(4,1fr); } }
+.stat{ padding:28px 20px 30px 0; border-bottom:1px solid var(--line); }
+.stat:nth-child(2n){ padding-left:20px; border-left:1px solid var(--line); }
+@media (min-width:900px){ .stat{ padding-left:24px !important; border-left:1px solid var(--line); border-bottom:0; } .stat:first-child{ padding-left:0 !important; border-left:0; } }
+.stat .big{ font-stretch:125%; font-weight:850; font-size:clamp(2.4rem,4.6vw,4rem); line-height:.95; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.logos{ display:grid; grid-template-columns:repeat(2,1fr); border:1px solid var(--line); border-radius:18px; overflow:hidden; margin-top:clamp(48px,6vw,80px); }
+@media (min-width:700px){ .logos{ grid-template-columns:repeat(4,1fr); } }
+.logo-cell{ height:104px; display:grid; place-items:center; border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--muted); transition:color .25s, background .25s; padding:0 12px; text-align:center; }
+.logo-cell:hover{ color:var(--ink); background:color-mix(in srgb, var(--ink) 3%, transparent); }
+.logos .logo-cell:nth-child(2n){ border-right:0; }
+@media (min-width:700px){ .logos .logo-cell:nth-child(2n){ border-right:1px solid var(--line);} .logos .logo-cell:nth-child(4n){ border-right:0; } .logos .logo-cell:nth-last-child(-n+4){ border-bottom:0; } }
+@media (max-width:699px){ .logos .logo-cell:nth-last-child(-n+2){ border-bottom:0; } }
+.quotes{ display:grid; gap:18px; margin-top:clamp(48px,6vw,80px); }
+@media (min-width:900px){ .quotes{ grid-template-columns:1.3fr 1fr 1fr; } }
+.quote{ border-radius:20px; padding:26px; background:var(--surface); border:1px solid var(--line); display:flex; flex-direction:column; gap:22px; margin:0; }
+.quote blockquote{ margin:0; font-size:1.06rem; line-height:1.5; }
+.quote.feature{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.quote.feature blockquote{ font-stretch:108%; font-size:clamp(1.2rem,1.8vw,1.5rem); font-weight:520; line-height:1.35; }
+.quote.feature .tech{ color:color-mix(in srgb, var(--bg) 65%, transparent); }
+.quote figcaption{ margin-top:auto; display:flex; gap:12px; align-items:center; }
+.avatar{ width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-weight:750; font-size:.85rem; background:var(--bg-2); color:var(--ink); flex:none; font-stretch:115%; }
+.quote.feature .avatar{ background:var(--accent); color:var(--on-accent); }
+
+/* ============ QUOTE FORM ============ */
+.cta{ border-radius:28px; overflow:hidden; background:var(--ink); color:var(--bg); position:relative; }
+.cta .gridbg{ position:absolute; inset:0; opacity:.6; background-image:linear-gradient(color-mix(in srgb, var(--bg) 8%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--bg) 8%, transparent) 1px, transparent 1px); background-size:40px 40px; }
+.cta-inner{ position:relative; display:grid; gap:36px; padding:clamp(28px,5vw,64px); }
+@media (min-width:1000px){ .cta-inner{ grid-template-columns:1fr 1.1fr; gap:64px; } }
+.cta .lede{ color:color-mix(in srgb, var(--bg) 72%, transparent); }
+.form{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+.field{ display:flex; flex-direction:column; gap:6px; grid-column:span 2; }
+@media (min-width:600px){ .field.half{ grid-column:span 1; } }
+.field label{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:color-mix(in srgb, var(--bg) 62%, transparent); }
+.field input, .field select{
+  height:48px; border-radius:12px; padding:0 14px; font:inherit; font-size:.95rem;
+  background:color-mix(in srgb, var(--bg) 7%, transparent); color:var(--bg);
+  border:1px solid color-mix(in srgb, var(--bg) 18%, transparent); transition:border-color .2s, background .2s; outline:none; min-width:0;
+}
+.field select option{ color:#111; }
+.field input::placeholder{ color:color-mix(in srgb, var(--bg) 40%, transparent); }
+.field input:focus, .field select:focus{ border-color:var(--accent); background:color-mix(in srgb, var(--bg) 11%, transparent); }
+.field input[aria-invalid="true"]{ border-color:#FF7A59; }
+.err{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:#FF9A80; min-height:1em; grid-column:span 2; }
+.done{ border:1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius:18px; padding:26px; background:color-mix(in srgb, var(--accent) 8%, transparent); }
+
+/* ============ FOOTER ============ */
+footer{ border-top:1px solid var(--line); padding:48px 0 36px; margin-top:clamp(80px,10vw,130px); }
+footer a{ color:var(--ink-2); text-decoration:none; }
+footer a:hover{ color:var(--ink); }
+
+/* ============ REVEAL / TOAST ============ */
+.reveal{ opacity:0; transform:translateY(18px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in{ opacity:1; transform:none; }
+.toast{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 22px); transform:translate(-50%, 20px); opacity:0; pointer-events:none; z-index:60;
+  background:var(--ink); color:var(--bg); padding:12px 16px; border-radius:12px; font-family:'IBM Plex Mono',monospace; font-size:.8rem; transition:all .3s; max-width:calc(100% - 32px); }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  .reveal{ opacity:1; transform:none; }
+  .draw{ stroke-dashoffset:0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<div class="nav-shell">
+  <div class="wrap">
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#top" class="logo" aria-label="LOGIX // FREIGHT home">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+          <rect x="1" y="1" width="28" height="28" rx="8" fill="var(--ink)"/>
+          <path d="M11 22 L16 8 M16.5 22 L21.5 8" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-word">LOGIX<span>//</span>FREIGHT</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#fleet">Fleet</a>
+        <a href="#services">Services</a>
+        <a href="#network">Network</a>
+        <a href="#technology">Technology</a>
+        <a href="#blueprint">Blueprint</a>
+        <a href="#about">About</a>
+      </div>
+      <div class="nav-actions">
+        <button class="icon-btn" id="themeBtn" aria-label="Switch color theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-sm portal-btn" data-portal>Client portal</button>
+        <a href="#quote" class="btn btn-accent btn-sm quote-btn">Request quote</a>
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
+        </button>
+      </div>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <a href="#fleet">Fleet <span class="tech">4,212 tractors</span></a>
+      <a href="#services">Services <span class="tech">5 lines</span></a>
+      <a href="#network">Network <span class="tech">18 hubs</span></a>
+      <a href="#technology">Technology <span class="tech">4 systems</span></a>
+      <a href="#blueprint">Blueprint <span class="tech">3 trailers</span></a>
+      <a href="#about">About</a>
+      <div style="display:flex; gap:8px; padding:8px 4px 4px;">
+        <button class="btn btn-ghost btn-sm" data-portal style="flex:1; justify-content:center;">Client portal</button>
+        <a href="#quote" class="btn btn-accent btn-sm" style="flex:1; justify-content:center;">Request quote</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+<!-- ================= HERO: 360° RIG ================= -->
+<section class="rig" id="top" aria-label="Interactive 360 degree view of the LOGIX tractor-trailer">
+  <div class="rig-sticky gridbg">
+    <div class="rig-canvas" id="rigCanvas" tabindex="0" role="img" aria-label="3D tractor-trailer that turns a full 360 degrees as you scroll. Drag sideways or use the arrow keys to spin it."></div>
+    <div class="callouts" id="callouts"><svg id="coLines" aria-hidden="true"></svg></div>
+
+    <div class="rig-head" id="rigHead">
+      <div class="wrap inner">
+        <div>
+          <div class="status-pill"><span class="dot-live"></span><span id="liveLoads">1,847</span> loads moving right now</div>
+          <h1 class="display">Reinventing freight logistics for the future</h1>
+        </div>
+        <div>
+          <p class="tech" style="margin:0 0 12px;">Automated fleet management <b>/</b> high-efficiency transport</p>
+          <p class="lede" style="margin:0 0 24px;">Every tractor we run reports its position, load and fuel burn every 15 seconds. Our planners use that feed to route 4,000 trucks with fewer empty miles and ETAs you can hold us to.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#quote" class="btn btn-accent">Request a quote</a>
+            <a href="#network" class="btn btn-ghost">See the network</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rig-cue tech" id="rigCue">Scroll to turn the rig 360°<i></i></div>
+
+    <div class="rig-hud" id="rigHud">
+      <div class="wrap inner">
+        <div class="hud-read">
+          <div class="tech" id="hudView">Driver side</div>
+          <div class="v mono" id="hudHeading">000°</div>
+        </div>
+        <div>
+          <div class="views" id="views" role="group" aria-label="Jump to a view"></div>
+          <div class="hud-bar"><i id="hudBar"></i></div>
+        </div>
+        <div class="tech hud-hint">Scroll to turn <b>/</b> drag to spin</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="fleet-sec">
+  <div class="wrap">
+    <div class="fleet-band" id="fleet">
+      <div class="fleet-cell"><div class="fleet-num" data-count="4212">0</div><div class="tech" style="margin-top:10px;">tractors on the road</div></div>
+      <div class="fleet-cell"><div class="fleet-num" data-count="9860">0</div><div class="tech" style="margin-top:10px;">trailers across 3 types</div></div>
+      <div class="fleet-cell"><div class="fleet-num"><span data-count="2.1" data-dec="1">0</span> yr</div><div class="tech" style="margin-top:10px;">average tractor age</div></div>
+      <div class="fleet-cell"><div class="fleet-num"><span data-count="31">0</span>%</div><div class="tech" style="margin-top:10px;">running on RNG or battery</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section class="section" id="services">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div><span class="sec-code">SVC / 05 lines of service</span><h2 class="h2">Freight we move, and how fast we can start</h2></div>
+      <p class="lede" style="margin:0;">Book any of these through the portal or a planner. Lead time is how soon a truck can be at your dock after you confirm.</p>
+    </div>
+    <div class="svc-list">
+      <div class="svc reveal" tabindex="0"><div class="svc-name">Full truckload</div><p>Dedicated 53′ dry vans, door to door, with live tracking from pickup scan to signed delivery.</p><span class="tech">Lead time <b>4 h</b></span></div>
+      <div class="svc reveal" tabindex="0"><div class="svc-name">Heavy haul &amp; oversize</div><p>Lowboys and step-decks for machinery up to 120,000 lb, with permits and escort vehicles arranged for you.</p><span class="tech">Lead time <b>48 h</b></span></div>
+      <div class="svc reveal" tabindex="0"><div class="svc-name">Temperature-controlled</div><p>Reefers held between −20 °F and 70 °F, logged every 60 seconds and shared with you as a compliance report.</p><span class="tech">Lead time <b>6 h</b></span></div>
+      <div class="svc reveal" tabindex="0"><div class="svc-name">Cross-border</div><p>US, Mexico and Canada lanes with customs filed before the truck reaches the border.</p><span class="tech">Lead time <b>12 h</b></span></div>
+      <div class="svc reveal" tabindex="0"><div class="svc-name">Dedicated fleet</div><p>Trucks and drivers assigned to your network only, planned around your dock schedules.</p><span class="tech">Onboarding <b>14 days</b></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BLUEPRINT ================= -->
+<section class="section" id="blueprint" style="padding-top:0;">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div><span class="sec-code">BPR / trailer configurations</span><h2 class="h2">Pick a trailer, read its spec sheet</h2></div>
+      <p class="lede" style="margin:0;">Each configuration below is a trailer class we run today. Dimensions and limits are what we can legally load on US interstates.</p>
+    </div>
+
+    <div class="bp reveal">
+      <div class="bp-panel">
+        <div class="tabs" role="tablist" aria-label="Trailer type">
+          <button class="tab" role="tab" aria-selected="true" data-cfg="van">53′ dry van</button>
+          <button class="tab" role="tab" aria-selected="false" data-cfg="reefer">53′ reefer</button>
+          <button class="tab" role="tab" aria-selected="false" data-cfg="flat">48′ flatbed</button>
+        </div>
+        <div>
+          <h3 class="h3" id="bpName">53′ dry van</h3>
+          <p id="bpDesc" style="margin:8px 0 0; color:var(--ink-2); font-size:.95rem;"></p>
+        </div>
+        <dl id="bpSpecs" style="margin:0;"></dl>
+        <div class="sys" id="bpSys" aria-live="polite"></div>
+      </div>
+      <div class="bp-canvas">
+        <div class="gridbg"></div>
+        <svg class="bp-svg" id="bpSvg" viewBox="0 0 820 380" role="img" aria-label="Blueprint side elevation of the selected trailer"></svg>
+        <span class="bp-corner" style="left:16px; bottom:12px;">Side elevation, scale 1:96</span>
+        <span class="bp-corner" style="right:16px; bottom:12px;" id="bpRev">Rev. C</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TECHNOLOGY / HOTSPOTS ================= -->
+<section class="section gridbg" id="technology" style="border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div><span class="sec-code">SYS / 04 onboard systems</span><h2 class="h2">What every truck in the fleet knows</h2></div>
+      <p class="lede" style="margin:0;">Tap a marker to see what that system does and how it performed across the fleet last quarter.</p>
+    </div>
+    <div class="tech-wrap">
+      <div class="hs-stage reveal">
+        <div class="hs-track" id="hsTrack">
+          <svg id="truckHs" viewBox="0 0 1000 300" aria-hidden="true"></svg>
+        </div>
+        <div class="ground" style="margin-top:0;"></div>
+      </div>
+      <div class="hs-panel reveal" id="hsPanel" aria-live="polite">
+        <div id="hsBody"></div>
+        <div class="hs-nav" id="hsNav" aria-label="Systems"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NETWORK ================= -->
+<section class="section" id="network">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div><span class="sec-code">NET / 18 hubs, 5 continents</span><h2 class="h2">One network, tracked lane by lane</h2></div>
+      <p class="lede" style="margin:0;">Road lanes connect hubs on each continent. Intercontinental legs ride ocean or rail, and our trucks take over at both ends.</p>
+    </div>
+
+    <div class="net reveal">
+      <div class="net-top">
+        <div class="chips" role="group" aria-label="Filter lanes by region">
+          <button class="chip" aria-pressed="true" data-region="all">All lanes</button>
+          <button class="chip" aria-pressed="false" data-region="am">Americas</button>
+          <button class="chip" aria-pressed="false" data-region="emea">Europe &amp; Africa</button>
+          <button class="chip" aria-pressed="false" data-region="apac">Asia-Pacific</button>
+        </div>
+        <span class="tech"><span class="dot-live" style="display:inline-block; vertical-align:middle; margin-right:8px;"></span>Live, updated every 15 s</span>
+      </div>
+      <div class="map-box">
+        <svg class="map-svg" id="mapSvg" viewBox="0 0 1000 400" role="img" aria-label="World map of LOGIX hubs and freight lanes"></svg>
+      </div>
+      <div class="net-stats">
+        <div class="net-stat"><div class="tech">Active lanes</div><div class="v" id="nLanes">0</div></div>
+        <div class="net-stat"><div class="tech">Loads in transit</div><div class="v" id="nLoads">0</div></div>
+        <div class="net-stat"><div class="tech">Freight moving now</div><div class="v"><span id="nTons">0</span> t</div></div>
+        <div class="net-stat"><div class="tech">Average hub dwell</div><div class="v"><span id="nDwell">0</span> min</div></div>
+      </div>
+      <div class="feed" id="feed" aria-live="off"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROOF / ABOUT ================= -->
+<section class="section" id="about" style="padding-top:0;">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div><span class="sec-code">ABT / since 2009</span><h2 class="h2">Shippers stay because the numbers hold</h2></div>
+      <p class="lede" style="margin:0;">We started with nine trucks out of Joliet, Illinois. We still measure ourselves the same way: did the freight arrive when we said it would.</p>
+    </div>
+
+    <div class="stats reveal">
+      <div class="stat"><div class="big"><span data-count="99.8" data-dec="1">0</span>%</div><div class="tech" style="margin-top:12px;">on-time delivery, trailing 12 months</div></div>
+      <div class="stat"><div class="big"><span data-count="10">0</span>M+</div><div class="tech" style="margin-top:12px;">miles tracked every month</div></div>
+      <div class="stat"><div class="big"><span data-count="6.2" data-dec="1">0</span>%</div><div class="tech" style="margin-top:12px;">empty miles, vs. 20% industry average</div></div>
+      <div class="stat"><div class="big">&lt;<span data-count="2">0</span> h</div><div class="tech" style="margin-top:12px;">from quote request to firm price</div></div>
+    </div>
+
+    <div class="logos reveal" aria-label="Clients">
+      <div class="logo-cell"><span style="font-stretch:125%; font-weight:900; font-size:1.25rem; letter-spacing:-.02em;">NORTHPOINT</span></div>
+      <div class="logo-cell"><span style="font-weight:500; font-size:1.3rem; font-style:italic;">Kessler Agro</span></div>
+      <div class="logo-cell"><span style="font-stretch:62%; font-weight:800; font-size:1.55rem; letter-spacing:.04em;">HALVORSEN STEEL</span></div>
+      <div class="logo-cell"><span class="mono" style="font-weight:600; font-size:1.05rem;">meridian/retail</span></div>
+      <div class="logo-cell"><span style="font-stretch:112%; font-weight:300; font-size:1.35rem; letter-spacing:.2em;">OSTRAVA</span></div>
+      <div class="logo-cell"><span style="font-weight:750; font-size:1.25rem;">Pallas<span style="font-weight:300;">Pharma</span></span></div>
+      <div class="logo-cell"><span style="font-stretch:90%; font-weight:650; font-size:1.3rem;">◐ Quayside Foods</span></div>
+      <div class="logo-cell"><span style="font-stretch:125%; font-weight:600; font-size:1.05rem; letter-spacing:.06em;">BRIGHTLINE·ENERGY</span></div>
+    </div>
+
+    <div class="quotes">
+      <figure class="quote feature reveal">
+        <blockquote>“We moved 1,400 reefer loads with LOGIX last year and lost zero to temperature excursions. Their logs go straight into our FDA audit file.”</blockquote>
+        <figcaption><span class="avatar">RM</span><span><strong style="display:block;">Rosa Márquez</strong><span class="tech">VP Supply Chain, Quayside Foods</span></span></figcaption>
+      </figure>
+      <figure class="quote reveal">
+        <blockquote>“The ETA on the portal is the ETA. Our dock crews schedule off it now.”</blockquote>
+        <figcaption><span class="avatar">DK</span><span><strong style="display:block;">Daniel Kessler</strong><span class="tech">Logistics Director, Kessler Agro</span></span></figcaption>
+      </figure>
+      <figure class="quote reveal">
+        <blockquote>“They permitted and escorted a 96,000 lb press across four states in eleven days.”</blockquote>
+        <figcaption><span class="avatar">AH</span><span><strong style="display:block;">Anja Halvorsen</strong><span class="tech">Operations, Halvorsen Steel</span></span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= QUOTE ================= -->
+<section id="quote" style="padding-bottom:0;">
+  <div class="wrap">
+    <div class="cta reveal">
+      <div class="gridbg"></div>
+      <div class="cta-inner">
+        <div>
+          <span class="sec-code" style="color:var(--accent);">RFQ / firm price in under 2 hours</span>
+          <h2 class="h2">Get a quote for your next load</h2>
+          <p class="lede" style="margin-top:18px;">Tell us where it starts, where it ends and what it is. A freight planner replies with a firm price and the earliest pickup we can guarantee.</p>
+          <p class="tech" style="margin-top:28px; color:color-mix(in srgb, var(--bg) 55%, transparent);">Prefer to talk? Call dispatch at +1 (815) 555-0142, open 24/7.</p>
+        </div>
+        <div id="formWrap">
+          <form class="form" id="quoteForm" novalidate>
+            <div class="field half"><label for="fOrigin">Pickup city</label><input id="fOrigin" name="origin" placeholder="Joliet, IL" required autocomplete="off"></div>
+            <div class="field half"><label for="fDest">Delivery city</label><input id="fDest" name="dest" placeholder="Laredo, TX" required autocomplete="off"></div>
+            <div class="field half"><label for="fType">Equipment</label>
+              <select id="fType" name="type"><option>53′ dry van</option><option>53′ reefer</option><option>48′ flatbed</option><option>Heavy haul</option></select></div>
+            <div class="field half"><label for="fWeight">Weight (lb)</label><input id="fWeight" name="weight" inputmode="numeric" placeholder="42,000"></div>
+            <div class="field"><label for="fEmail">Work email</label><input id="fEmail" name="email" type="email" placeholder="you@company.com" required autocomplete="email"></div>
+            <div class="err" id="formErr" role="alert"></div>
+            <div style="grid-column:span 2;"><button class="btn btn-accent" type="submit" style="width:100%; justify-content:center; height:52px;">Send quote request</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <div>
+      <a href="#top" class="logo"><svg width="26" height="26" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="8" fill="var(--ink)"/><path d="M11 22 L16 8 M16.5 22 L21.5 8" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/></svg><span class="logo-word">LOGIX<span>//</span>FREIGHT</span></a>
+      <p class="tech" style="margin-top:16px; max-width:30em;">USDOT 2931047 <b>/</b> MC 981223. Headquarters: 1200 Channahon Rd, Joliet, IL.</p>
+    </div>
+    <div class="grid gap-2 content-start"><span class="tech">Company</span><a href="#about">About</a><a href="#fleet">Fleet</a><a href="#technology">Technology</a></div>
+    <div class="grid gap-2 content-start"><span class="tech">Shipping</span><a href="#services">Services</a><a href="#network">Network</a><a href="#quote">Request quote</a></div>
+    <div class="grid gap-2 content-start"><span class="tech">Drivers</span><a href="#about">Careers</a><a href="#about">Safety record</a><button data-portal style="text-align:left; background:none; border:0; padding:0; color:var(--ink-2); font:inherit; cursor:pointer;">Client portal</button></div>
+  </div>
+  <div class="wrap" style="margin-top:40px;"><p class="tech" style="margin:0;">© 2026 Logix Freight Inc.</p></div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt = (n, d = 0) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+/* ---------- Toast ---------- */
+const toast = (msg) => {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+};
+$$('[data-portal]').forEach(b => b.addEventListener('click', () => toast('Client portal sign-in connects to your account system here.')));
+
+/* ---------- Theme ---------- */
+(function theme(){
+  const root = document.documentElement;
+  try { const s = localStorage.getItem('logix-theme'); if (s) root.dataset.theme = s; } catch(e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const cur = root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem('logix-theme', next); } catch(e) {}
+  });
+})();
+
+/* ---------- Nav ---------- */
+(function nav(){
+  const nav = $('#nav'), menuBtn = $('#menuBtn'), menu = $('#mobileMenu');
+  const onScroll = () => nav.classList.toggle('scrolled', scrollY > 10);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  menuBtn.addEventListener('click', () => {
+    const open = menu.hidden; menu.hidden = !open; menuBtn.setAttribute('aria-expanded', String(open));
+  });
+  $$('#mobileMenu a').forEach(a => a.addEventListener('click', () => { menu.hidden = true; menuBtn.setAttribute('aria-expanded','false'); }));
+  const links = $$('#navLinks a');
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+  }), { rootMargin: '-45% 0px -50% 0px' });
+  ['fleet','services','network','technology','blueprint','about'].forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+})();
+
+/* ---------- Truck SVG generator ---------- */
+function truckSVG(mode, uid){
+  const wire = mode === 'wire';
+  const ribs = Array.from({ length: 23 }, (_, i) => `<line class="p-rib" x1="${46 + i * 25}" y1="46" x2="${46 + i * 25}" y2="180"/>`).join('');
+  const wheels = [110, 180, 575, 645, 880];
+  const wheel = cx => {
+    const lugs = [0,60,120,180,240,300].map(a => { const r = a * Math.PI / 180;
+      return `<circle class="p-lug" fill="#6F777F" cx="${(cx + Math.cos(r) * 13).toFixed(1)}" cy="${(246 + Math.sin(r) * 13).toFixed(1)}" r="2.6"/>`; }).join('');
+    return `<g class="wheel">
+      <circle fill="#121416" cx="${cx}" cy="246" r="36"/>
+      <circle fill="none" stroke="#24282C" stroke-width="3" cx="${cx}" cy="246" r="31"/>
+      <circle fill="url(#rim-${uid})" cx="${cx}" cy="246" r="21"/>
+      <g class="spin" data-cx="${cx}">${lugs}<line class="p-spoke" x1="${cx - 19}" y1="246" x2="${cx + 19}" y2="246"/></g>
+      <circle fill="#1C2024" cx="${cx}" cy="246" r="6"/>
+    </g>`;
+  };
+  const extras = wire ? `
+    <line class="w-extra" x1="0" y1="282" x2="1000" y2="282"/>
+    ${wheels.map(cx => `<line class="w-extra" x1="${cx}" y1="196" x2="${cx}" y2="296"/><line class="w-extra" x1="${cx-46}" y1="246" x2="${cx+46}" y2="246"/>`).join('')}
+    <line class="w-extra" x1="20" y1="10" x2="944" y2="10"/>
+    <line class="w-extra" x1="20" y1="4" x2="20" y2="30"/><line class="w-extra" x1="944" y1="4" x2="944" y2="30"/>
+    <text class="w-label" x="482" y="0" text-anchor="middle">overall 21.9 m</text>
+    <text class="w-label" x="145" y="310" text-anchor="middle">tandem 34,000 lb</text>
+    <text class="w-label" x="610" y="310" text-anchor="middle">drive 34,000 lb</text>
+    <text class="w-label" x="880" y="310" text-anchor="middle">steer 12,000 lb</text>` : '';
+  return `
+  <defs>
+    <linearGradient id="cab-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBFCF9"/><stop offset=".55" stop-color="#D9DDE0"/><stop offset="1" stop-color="#9AA1A8"/></linearGradient>
+    <linearGradient id="trl-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3C424A"/><stop offset="1" stop-color="#22262B"/></linearGradient>
+    <linearGradient id="gls-${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3A4854"/><stop offset=".5" stop-color="#121A21"/><stop offset="1" stop-color="#0A0E12"/></linearGradient>
+    <radialGradient id="rim-${uid}"><stop offset="0" stop-color="#E4E7EA"/><stop offset="1" stop-color="#7E868E"/></radialGradient>
+    <linearGradient id="tank-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0F2F3"/><stop offset=".5" stop-color="#A9B0B6"/><stop offset="1" stop-color="#6E757C"/></linearGradient>
+    <radialGradient id="beam-${uid}" cx="0" cy=".5" r="1"><stop offset="0" stop-color="#C8FF2E" stop-opacity=".55"/><stop offset="1" stop-color="#C8FF2E" stop-opacity="0"/></radialGradient>
+  </defs>
+  ${wire ? '' : `<ellipse cx="500" cy="284" rx="480" ry="7" fill="#000" opacity=".28"/>`}
+  ${wire ? '' : `<path d="M944 150 L1000 132 L1000 176 Z" fill="url(#beam-${uid})"/>`}
+  <g>
+    <rect x="20" y="38" width="600" height="172" rx="4" fill="url(#trl-${uid})"/>
+    <g>${ribs}</g>
+    <rect x="20" y="184" width="600" height="7" fill="#C8FF2E"/>
+    <text class="p-livery" x="320" y="126" text-anchor="middle" fill="#EEF0EB">LOGIX<tspan fill="#C8FF2E" dx="6">//</tspan><tspan dx="6">FREIGHT</tspan></text>
+    <text x="320" y="152" text-anchor="middle" fill="#8C939B" style="font:500 12px 'IBM Plex Mono',monospace; letter-spacing:.5px;">UNIT 4471  /  53 FT  /  SMART TRAILER</text>
+    <rect x="20" y="38" width="8" height="172" fill="#2E3339"/>
+    <rect x="40" y="210" width="580" height="10" fill="#1A1D21"/>
+    <path class="p-gear" d="M520 220 V262 M508 263 H532"/>
+    <rect x="30" y="220" width="46" height="8" rx="2" fill="#2A2F35"/>
+  </g>
+  <g>
+    <path d="M560 206 H932 V218 H560 Z" fill="#1A1D21"/>
+    <path d="M640 50 L640 34 Q640 27 648 27 L716 29 Q760 32 792 50 Z" fill="url(#cab-${uid})"/>
+    <path d="M636 212 V66 Q636 50 652 49 L770 44 Q792 43 804 56 L862 116 Q870 124 882 126 L918 132 Q940 136 942 158 L944 204 Q944 212 934 212 Z" fill="url(#cab-${uid})"/>
+    <path d="M836 212 A44 44 0 0 1 924 212 Z" fill="#15181B"/>
+    <path d="M776 60 L800 58 L848 112 L776 112 Z" fill="url(#gls-${uid})"/>
+    <path d="M805 58 L864 118" stroke="#1C242B" stroke-width="5" fill="none"/>
+    <rect x="684" y="78" width="46" height="16" rx="4" fill="url(#gls-${uid})"/>
+    <path class="p-seam" d="M770 56 V200 M836 120 V200 M636 150 H770"/>
+    <rect x="792" y="128" width="18" height="5" rx="2" fill="#6B7279"/>
+    <path d="M866 86 L876 86 L878 120 L868 120 Z" fill="#1E2328"/>
+    <path d="M858 104 L868 104" stroke="#1E2328" stroke-width="3"/>
+    <rect x="926" y="162" width="18" height="36" rx="3" fill="#1E2328"/>
+    <path d="M930 168 H944 M930 176 H944 M930 184 H944 M930 192 H944" stroke="#3A4047" stroke-width="2"/>
+    <rect x="898" y="198" width="50" height="14" rx="4" fill="#23282D"/>
+    <path d="M912 142 L942 148 L942 158 L914 154 Z" fill="#C8FF2E"/>
+    <rect x="704" y="184" width="92" height="26" rx="13" fill="url(#tank-${uid})"/>
+    <path d="M726 184 V210 M774 184 V210" stroke="#6E757C" stroke-width="3"/>
+    <rect x="806" y="198" width="26" height="5" rx="2" fill="#2F343A"/>
+    <rect x="690" y="212" width="6" height="46" rx="1" fill="#15181B"/>
+    <circle cx="642" cy="36" r="0"/>
+    <rect x="650" y="22" width="4" height="6" fill="#C8FF2E"/>
+  </g>
+  ${wheels.map(wheel).join('')}
+  ${extras}`;
+}
+
+/* ---------- Hero: 360° rig (Three.js) ---------- */
+(function rig(){
+  const section = $('#top'), mount = $('#rigCanvas'), head = $('#rigHead'), hud = $('#rigHud'), cue = $('#rigCue');
+  const coLayer = $('#callouts'), coSvg = $('#coLines');
+  const hudView = $('#hudView'), hudHeading = $('#hudHeading'), hudBar = $('#hudBar'), viewsEl = $('#views');
+  const TAU = Math.PI * 2;
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+
+  // scroll progress through the pinned section
+  const progress = () => {
+    const scrollable = Math.max(1, section.offsetHeight - innerHeight);
+    const p = clamp(-section.getBoundingClientRect().top / scrollable);
+    return { p, f: clamp(p / 0.05), r: clamp((p - 0.05) / 0.9) };
+  };
+  const applyHead = f => {
+    head.style.opacity = (1 - f).toFixed(3);
+    head.style.transform = `translateY(${(-f * 36).toFixed(1)}px)`;
+    head.style.visibility = f > 0.98 ? 'hidden' : 'visible';
+    cue.style.opacity = (1 - f * 1.6).toFixed(3);
+    hud.classList.toggle('on', f > 0.6);
+  };
+
+  let gl = null;
+  try { if (window.THREE) { const c = document.createElement('canvas'); gl = c.getContext('webgl2') || c.getContext('webgl'); } } catch (e) {}
+  if (!window.THREE || !gl) {
+    // no WebGL: show the flat truck and keep the page usable
+    mount.innerHTML = `<svg viewBox="0 0 1000 300" style="position:absolute; left:4%; width:92%; top:46%;" aria-hidden="true">${truckSVG('solid', 'fb')}</svg>`;
+    section.style.height = '100vh'; hud.style.display = 'none'; cue.style.display = 'none';
+    return;
+  }
+
+  /* renderer, scene, camera */
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  mount.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(28, 1, 0.5, 400);
+  const col = h => new THREE.Color(h).convertSRGBToLinear();
+
+  // studio reflections: a few light panels baked into an environment map
+  const studio = new THREE.Scene();
+  studio.background = col(0x23272c);
+  const panel = (w, h, x, y, z, rx, ry, c) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide }));
+    m.position.set(x, y, z); m.rotation.set(rx, ry, 0); studio.add(m);
+  };
+  panel(30, 8, 0, 14, 0, Math.PI / 2, 0, 0xffffff);
+  panel(24, 6, 0, 5, -16, 0, 0, 0xdfe5ea);
+  panel(24, 6, 0, 4, 16, 0, 0, 0x9aa3ab);
+  panel(12, 4, 16, 4, 0, 0, Math.PI / 2, 0x7d9a22);
+  panel(12, 4, -16, 6, 4, 0, Math.PI / 2, 0xffffff);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(studio, 0.04).texture;
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x1a1c1f, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.35); key.position.set(8, 14, 10); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xd9ff84, 0.55); rim.position.set(-10, 6, -8); scene.add(rim);
+
+  /* materials */
+  const std = (c, metal, rough, extra = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: col(c), metalness: metal, roughness: rough }, extra));
+  const M = {
+    trailer: std(0x2b3036, .55, .42), rib: std(0x3a4047, .5, .45), door: std(0x262a2f, .5, .5),
+    cab: std(0xeef0ec, .35, .26), dark: std(0x16191c, .3, .62), skirt: std(0x22262b, .4, .5),
+    chrome: std(0xdde2e6, 1, .16), rim: std(0xaab1b8, .9, .3), tire: std(0x111214, 0, .92),
+    glass: std(0x0b1116, .9, .06, { side: THREE.DoubleSide }),
+    lime: std(0xc8ff2e, .1, .4, { emissive: col(0xc8ff2e), emissiveIntensity: .55 }),
+    red: std(0xff3b2f, .1, .4, { emissive: col(0xff2a1a), emissiveIntensity: .9 }),
+    light: std(0xffffff, 0, .2, { emissive: col(0xf4f7ff), emissiveIntensity: 1 })
+  };
+
+  /* model: built from primitives in metres, truck faces +X, ground at y = 0 */
+  const truck = new THREE.Group();
+  const box = (w, h, d, m, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); truck.add(o); return o; };
+  const cyl = (rt, rb, h, m, x, y, z, axis) => {
+    const g = new THREE.CylinderGeometry(rt, rb, h, 20);
+    if (axis === 'x') g.rotateZ(Math.PI / 2); if (axis === 'z') g.rotateX(Math.PI / 2);
+    const o = new THREE.Mesh(g, m); o.position.set(x, y, z); truck.add(o); return o;
+  };
+
+  // trailer (x -7.7 .. 6.0)
+  box(13.7, 2.75, 2.5, M.trailer, -0.85, 2.675, 0);
+  for (let x = -7.1; x < 5.8; x += 0.92) box(0.05, 2.62, 2.51, M.rib, x, 2.675, 0);
+  box(13.66, 0.12, 2.52, M.lime, -0.85, 1.55, 0);
+  box(13.72, 0.08, 2.54, M.chrome, -0.85, 4.07, 0);
+  box(13.72, 0.14, 2.54, M.dark, -0.85, 1.33, 0);
+  box(0.05, 2.6, 2.44, M.door, -7.725, 2.675, 0);
+  box(0.07, 2.6, 0.03, M.dark, -7.76, 2.675, 0);
+  [-1.0, -0.35, 0.35, 1.0].forEach(z => cyl(0.025, 0.025, 2.5, M.chrome, -7.77, 2.675, z));
+  [-1.0, 1.0].forEach(z => box(0.04, 0.14, 0.3, M.red, -7.76, 1.72, z));
+  box(0.12, 0.12, 2.2, M.dark, -7.45, 0.72, 0);
+  [-0.8, 0.8].forEach(z => box(0.1, 0.5, 0.1, M.dark, -7.45, 0.98, z));
+  box(3.2, 0.3, 1.0, M.dark, -5.35, 1.1, 0);                                   // axle subframe
+  [-1.21, 1.21].forEach(z => box(7.4, 0.62, 0.04, M.skirt, -0.4, 1.0, z));      // side skirts
+  [-0.9, 0.9].forEach(z => { box(0.12, 1.1, 0.12, M.dark, 3.6, 0.85, z); box(0.35, 0.05, 0.35, M.dark, 3.6, 0.3, z); });
+  [-0.95, 0.95].forEach(z => { box(0.03, 0.55, 0.55, M.dark, -6.7, 0.55, z); box(0.03, 0.55, 0.55, M.dark, 4.3, 0.55, z); });
+
+  // livery panels on both trailer sides
+  const livCanvas = document.createElement('canvas'); livCanvas.width = 2048; livCanvas.height = 320;
+  const livTex = new THREE.CanvasTexture(livCanvas); livTex.encoding = THREE.sRGBEncoding;
+  livTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const drawLivery = () => {
+    const x = livCanvas.getContext('2d'), cw = livCanvas.width, ch = livCanvas.height;
+    x.clearRect(0, 0, cw, ch);
+    const parts = [['LOGIX', '#EEF0EB'], [' // ', '#C8FF2E'], ['FREIGHT', '#EEF0EB']];
+    let size = 170;
+    const setF = () => { x.font = `850 ${size}px Archivo, "Helvetica Neue", Arial, sans-serif`; x.font = `850 ultra-expanded ${size}px Archivo, "Helvetica Neue", Arial, sans-serif`; };
+    setF();
+    let w = parts.reduce((s, [t]) => s + x.measureText(t).width, 0);
+    if (w > cw * 0.94) { size *= cw * 0.94 / w; setF(); w = parts.reduce((s, [t]) => s + x.measureText(t).width, 0); }
+    let px = (cw - w) / 2;
+    parts.forEach(([t, c]) => { x.fillStyle = c; x.fillText(t, px, ch * 0.62); px += x.measureText(t).width; });
+    x.font = '500 34px "IBM Plex Mono", ui-monospace, monospace';
+    x.fillStyle = '#8C939B'; x.textAlign = 'center';
+    x.fillText('UNIT 4471  /  53 FT  /  SMART TRAILER', cw / 2, ch * 0.9); x.textAlign = 'left';
+    livTex.needsUpdate = true;
+  };
+  drawLivery();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawLivery);
+  const livMat = new THREE.MeshStandardMaterial({ map: livTex, transparent: true, roughness: .5, metalness: .1 });
+  const livGeo = new THREE.PlaneGeometry(10, 10 * 320 / 2048);
+  const livR = new THREE.Mesh(livGeo, livMat); livR.position.set(-0.9, 2.95, 1.262); truck.add(livR);
+  const livL = new THREE.Mesh(livGeo, livMat); livL.position.set(-0.9, 2.95, -1.262); livL.rotation.y = Math.PI; truck.add(livL);
+
+  // tractor chassis
+  box(7.0, 0.3, 1.0, M.dark, 7.9, 0.95, 0);
+  box(1.4, 0.15, 1.9, M.dark, 5.5, 1.2, 0);
+
+  // cab body: extruded side profile with a steer-wheel arch
+  const s = new THREE.Shape();
+  s.moveTo(7.0, 1.1); s.lineTo(7.0, 3.75); s.quadraticCurveTo(7.0, 4.08, 7.4, 4.08);
+  s.lineTo(8.7, 4.1); s.quadraticCurveTo(9.4, 4.05, 9.8, 3.78); s.lineTo(10.62, 2.58);
+  s.quadraticCurveTo(10.75, 2.42, 11.0, 2.4); s.lineTo(11.38, 2.36); s.quadraticCurveTo(11.52, 2.3, 11.52, 2.1);
+  s.lineTo(11.52, 0.82); s.lineTo(11.12, 0.82);
+  s.absarc(10.4, 0.52, 0.72, Math.atan2(0.3, 0.72), Math.PI - Math.atan2(0.3, 0.72), false);
+  s.lineTo(9.55, 0.82); s.lineTo(9.55, 1.1); s.lineTo(7.0, 1.1);
+  const cabGeo = new THREE.ExtrudeGeometry(s, { depth: 2.5, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 3, curveSegments: 24 });
+  cabGeo.translate(0, 0, -1.25);
+  truck.add(new THREE.Mesh(cabGeo, M.cab));
+
+  // windshield on the sloped face
+  const ws = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.03, 2.3), M.glass);
+  ws.position.set(10.21 + 0.058, 3.18 + 0.04, 0); ws.rotation.z = Math.atan2(-1.2, 0.82); truck.add(ws);
+  // side and sleeper windows
+  const sw = new THREE.Shape(); sw.moveTo(9.15, 2.62); sw.lineTo(9.15, 3.62); sw.lineTo(9.7, 3.72); sw.lineTo(10.42, 2.66); sw.lineTo(9.15, 2.62);
+  const slp = new THREE.Shape(); slp.moveTo(7.6, 3.0); slp.lineTo(8.3, 3.0); slp.lineTo(8.3, 3.35); slp.lineTo(7.6, 3.35); slp.lineTo(7.6, 3.0);
+  [sw, slp].forEach(sh => [1.316, -1.316].forEach(z => { const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), M.glass); m.position.z = z; truck.add(m); }));
+  box(0.025, 2.3, 2.64, M.dark, 9.12, 2.45, 0);                                  // door seam
+  box(2.5, 0.06, 2.64, M.lime, 8.25, 1.35, 0);                                    // cab accent line
+  [-0.6, -0.3, 0, 0.3, 0.6].forEach(z => box(0.08, 0.05, 0.12, M.lime, 8.9, 4.14, z));   // roof marker lights
+  box(0.06, 1.2, 1.5, M.dark, 11.56, 1.55, 0);                                    // grille
+  for (let y = 1.1; y < 2.1; y += 0.22) box(0.05, 0.04, 1.44, M.chrome, 11.6, y, 0);
+  [-0.85, 0.85].forEach(z => { box(0.06, 0.08, 0.6, M.lime, 11.55, 2.14, z); box(0.06, 0.18, 0.35, M.light, 11.55, 1.25, z * 1.12); });
+  box(0.35, 0.45, 2.6, M.dark, 11.5, 0.95, 0);                                    // bumper
+  [-1, 1].forEach(sd => { box(0.04, 0.04, 0.35, M.chrome, 10.1, 3.2, sd * 1.45); box(0.12, 0.55, 0.18, M.dark, 10.1, 2.95, sd * 1.63); });
+  [-1.05, 1.05].forEach(z => cyl(0.1, 0.1, 3.2, M.chrome, 6.8, 2.6, z));          // exhaust stacks
+  [-1.29, 1.29].forEach(z => box(0.5, 2.6, 0.04, M.cab, 6.75, 2.5, z));           // cab extenders
+  [-1.12, 1.12].forEach(z => cyl(0.34, 0.34, 1.7, M.chrome, 8.45, 0.72, z, 'x'));  // fuel tanks
+
+  // wheels and axles
+  const tireG = new THREE.CylinderGeometry(0.52, 0.52, 0.3, 32); tireG.rotateX(Math.PI / 2);
+  const rimG = new THREE.CylinderGeometry(0.31, 0.31, 0.31, 24); rimG.rotateX(Math.PI / 2);
+  const hubG = new THREE.CylinderGeometry(0.11, 0.14, 0.36, 16); hubG.rotateX(Math.PI / 2);
+  const wheel = (x, z) => [[tireG, M.tire], [rimG, M.rim], [hubG, M.chrome]].forEach(([g, m]) => { const o = new THREE.Mesh(g, m); o.position.set(x, 0.52, z); truck.add(o); });
+  [-6.0, -4.75, 5.0, 6.3].forEach(x => { [0.78, 1.1, -0.78, -1.1].forEach(z => wheel(x, z)); cyl(0.08, 0.08, 2.2, M.dark, x, 0.52, 0, 'z'); });
+  [1.08, -1.08].forEach(z => wheel(10.4, z)); cyl(0.08, 0.08, 2.1, M.dark, 10.4, 0.52, 0, 'z');
+
+  truck.position.x = -1.89;   // centre the rig on the turntable
+
+  /* turntable + contact shadow, rotating with the truck */
+  const turn = new THREE.Group(); turn.add(truck); scene.add(turn);
+  const tc = document.createElement('canvas'); tc.width = tc.height = 1024;
+  (() => {
+    const x = tc.getContext('2d'); x.translate(512, 512);
+    x.strokeStyle = 'rgba(140,148,156,.55)'; x.lineWidth = 2;
+    [500, 430, 250].forEach(r => { x.beginPath(); x.arc(0, 0, r, 0, TAU); x.stroke(); });
+    for (let i = 0; i < 72; i++) {
+      const a = i / 72 * TAU, l = i % 6 === 0 ? 34 : 16;
+      x.lineWidth = i % 6 === 0 ? 3 : 1.5;
+      x.beginPath(); x.moveTo(Math.cos(a) * (500 - l), Math.sin(a) * (500 - l)); x.lineTo(Math.cos(a) * 500, Math.sin(a) * 500); x.stroke();
+    }
+    x.strokeStyle = '#C8FF2E'; x.lineWidth = 8;
+    x.beginPath(); x.arc(0, 0, 500, -0.35, 0.35); x.stroke();
+    x.beginPath(); x.arc(0, 0, 500, Math.PI - 0.35, Math.PI + 0.35); x.stroke();
+  })();
+  const tableTex = new THREE.CanvasTexture(tc); tableTex.encoding = THREE.sRGBEncoding; tableTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(12.5, 96), new THREE.MeshBasicMaterial({ map: tableTex, transparent: true, depthWrite: false }));
+  disc.rotation.x = -Math.PI / 2; disc.position.y = 0.005; turn.add(disc);
+  const sc = document.createElement('canvas'); sc.width = sc.height = 256;
+  (() => { const x = sc.getContext('2d'); const g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+    g.addColorStop(0, 'rgba(0,0,0,.62)'); g.addColorStop(.55, 'rgba(0,0,0,.3)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 256, 256); })();
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(22, 5.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.015; shadow.renderOrder = 1; turn.add(shadow);
+
+  /* callouts anchored to parts of the model (point + outward normal, truck-local) */
+  const CO = [
+    { t: 'Telematics', v: 'GPS + load ping every 15 s', d: 'The roof modem reports position, speed and trailer weight over cellular, with satellite backup in dead zones.', a: [[7.7, 4.14, 0, 0, 1, 0]] },
+    { t: 'Aerodynamics', v: '−14% drag vs. 2018 cab', d: 'Sloped windshield, roof fairing, cab extenders and trailer side skirts keep airflow attached from bumper to doors.', a: [[10.2, 3.2, 0, 1.2, 0.82, 0], [-0.4, 0.95, 1.23, 0, 0, 1], [-0.4, 0.95, -1.23, 0, 0, -1]] },
+    { t: 'Cargo capacity', v: '45,000 lb / 3,489 ft³', d: 'A 53-foot box with 26 pallet positions. Load cells in the suspension report the real weight at pickup.', a: [[-3.2, 3.5, 1.27, 0, 0, 1], [-3.2, 3.5, -1.27, 0, 0, -1]] },
+    { t: 'Autonomy sensors', v: 'Lidar + radar, 250 m', d: 'Forward lidar, radar and eight cameras let the truck drive mapped interstate lanes hands-off, with a driver on board.', a: [[11.62, 1.6, 0, 1, 0, 0]] },
+    { t: 'Eco-fuel', v: '9.4 mpg, −27% CO₂', d: 'Renewable natural gas or high-efficiency diesel, with predictive cruise that reads the road grade ahead.', a: [[8.45, 0.72, 1.47, 0, 0, 1], [8.45, 0.72, -1.47, 0, 0, -1]] },
+    { t: 'Cargo security', v: 'Door events logged live', d: 'Sensors on the rear doors timestamp every opening with a GPS point, so you know exactly when a seal was broken.', a: [[-7.8, 2.9, 0, -1, 0, 0]] }
+  ];
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const callouts = CO.map(c => {
+    const el = document.createElement('div'); el.className = 'co off'; el.style.opacity = 0;
+    el.innerHTML = `<button class="co-dot" aria-label="${c.t}"></button><button class="co-card" aria-expanded="false"><b>${c.t}</b><span class="tech">${c.v}</span><span class="co-desc">${c.d}</span></button>`;
+    coLayer.appendChild(el);
+    const line = document.createElementNS(SVGNS, 'line'); line.style.opacity = 0; coSvg.appendChild(line);
+    return { el, line, dot: $('.co-dot', el), card: $('.co-card', el), o: 0,
+      anchors: c.a.map(a => ({ p: new THREE.Vector3(a[0], a[1], a[2]), n: new THREE.Vector3(a[3], a[4], a[5]).normalize() })) };
+  });
+  callouts.forEach(c => {
+    const toggle = () => {
+      const open = !c.el.classList.contains('open');
+      callouts.forEach(o => { o.el.classList.remove('open'); o.card.setAttribute('aria-expanded', 'false'); });
+      if (open) { c.el.classList.add('open'); c.card.setAttribute('aria-expanded', 'true'); }
+    };
+    c.dot.addEventListener('click', toggle); c.card.addEventListener('click', toggle);
+  });
+
+  const Y = new THREE.Vector3(0, 1, 0), wp = new THREE.Vector3(), wn = new THREE.Vector3(), toCam = new THREE.Vector3();
+  function updateCallouts(W, H, alpha){
+    const vis = [];
+    callouts.forEach(c => {
+      let best = -2, bp = null;
+      c.anchors.forEach(a => {
+        wp.copy(a.p); truck.localToWorld(wp);
+        wn.copy(a.n).applyAxisAngle(Y, turn.rotation.y);
+        toCam.copy(camera.position).sub(wp).normalize();
+        const sc = wn.dot(toCam);
+        if (sc > best) { best = sc; bp = wp.clone(); }
+      });
+      const on = best > 0.15 && alpha > 0.5;
+      c.o += ((on ? 1 : 0) - c.o) * 0.2;
+      const o = (c.o * alpha).toFixed(3);
+      c.el.style.opacity = o; c.line.style.opacity = o;
+      c.el.classList.toggle('off', !on);
+      if (!on && c.el.classList.contains('open')) { c.el.classList.remove('open'); c.card.setAttribute('aria-expanded', 'false'); }
+      if (c.o < 0.02) return;
+      bp.project(camera);
+      const ax = (bp.x + 1) / 2 * W, ay = (1 - bp.y) / 2 * H;
+      vis.push({ c, ax, ay, side: ax > W / 2 ? 1 : -1, cw: c.card.offsetWidth, ch: c.card.offsetHeight });
+    });
+    const gap = W < 640 ? 24 : 44, rise = W < 640 ? 40 : 64, topMin = 88, botMax = H - (W < 640 ? 120 : 100);
+    [-1, 1].forEach(side => {
+      let prev = -Infinity;
+      vis.filter(v => v.side === side).sort((a, b) => a.ay - b.ay).forEach(v => {
+        const left = clamp(side > 0 ? v.ax + gap : v.ax - gap - v.cw, 12, W - v.cw - 12);
+        let top = Math.max(v.ay - rise - v.ch / 2, topMin, prev + 8);
+        top = Math.min(top, botMax - v.ch);
+        prev = top + v.ch;
+        v.c.dot.style.transform = `translate(${v.ax.toFixed(1)}px,${v.ay.toFixed(1)}px)`;
+        v.c.card.style.transform = `translate(${left.toFixed(1)}px,${top.toFixed(1)}px)`;
+        const ex = side > 0 ? left : left + v.cw, ey = top + v.ch / 2;
+        v.c.line.setAttribute('x1', v.ax.toFixed(1)); v.c.line.setAttribute('y1', v.ay.toFixed(1));
+        v.c.line.setAttribute('x2', ex.toFixed(1)); v.c.line.setAttribute('y2', ey.toFixed(1));
+      });
+    });
+  }
+
+  /* camera: orbits in elevation and distance so every heading is framed, with a raised 3/4 (isometric) view between the faces */
+  function frameCamera(theta, W, H, f){
+    const sn = Math.abs(Math.sin(theta)), cs = Math.abs(Math.cos(theta));
+    const e = (9 + 21 * Math.abs(Math.sin(2 * theta))) * Math.PI / 180;
+    const halfW = cs * 9.75 + sn * 1.4 + 0.5, halfD = sn * 9.75 + cs * 1.4;
+    const halfH = 2.3 + Math.sin(e) * halfD * 0.55;
+    const aspect = W / H, tanV = Math.tan(camera.fov * Math.PI / 360), tanH = tanV * aspect;
+    const fill = aspect < 0.8 ? 1.12 : (W < 1000 ? 0.9 : 0.78);
+    const d = Math.max(halfW / (tanH * fill), halfH / (tanV * 0.62)) + halfD * 0.55;
+    camera.position.set(0, 2.0 + d * Math.sin(e), d * Math.cos(e));
+    camera.lookAt(0, 1.9, 0);
+    camera.aspect = aspect;
+    // while the headline is on screen, push the rig lower in the frame
+    camera.setViewOffset(W, H, 0, -(1 - f) * H * (W < 700 ? 0.2 : 0.13), W, H);
+    camera.updateProjectionMatrix();
+  }
+
+  /* views, HUD */
+  const VIEWS = [['Side', 0], ['Front', 0.25], ['Iso', 0.375], ['Rear', 0.75]];
+  const NAMES = ['Driver side', 'Front 3/4, driver side', 'Front', 'Front 3/4, passenger side', 'Passenger side', 'Rear 3/4, passenger side', 'Rear', 'Rear 3/4, driver side'];
+  const viewBtns = VIEWS.map(([label, r]) => {
+    const b = document.createElement('button'); b.textContent = label; b.type = 'button';
+    b.addEventListener('click', () => {
+      const top = section.getBoundingClientRect().top + scrollY;
+      const scrollable = section.offsetHeight - innerHeight;
+      lastDrag = -1e9; vel = 0;
+      scrollTo({ top: top + (0.05 + 0.9 * r + 0.001) * scrollable, behavior: reduced ? 'auto' : 'smooth' });
+    });
+    viewsEl.appendChild(b); return b;
+  });
+
+  /* drag + keyboard spin */
+  let W = 1, H = 1, dragging = false, lx = 0, vel = 0, dragT = 0, lastDrag = -1e9;
+  mount.addEventListener('pointerdown', e => { dragging = true; lx = e.clientX; vel = 0; mount.classList.add('dragging'); try { mount.setPointerCapture(e.pointerId); } catch (_) {} });
+  mount.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const d = (e.clientX - lx) * (TAU / Math.max(600, W)); lx = e.clientX;
+    dragT += d; vel = d; lastDrag = performance.now();
+  });
+  const endDrag = () => { if (!dragging) return; dragging = false; mount.classList.remove('dragging'); lastDrag = performance.now(); };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => mount.addEventListener(t, endDrag));
+  mount.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); dragT += (e.key === 'ArrowRight' ? 1 : -1) * Math.PI / 8; lastDrag = performance.now(); }
+  });
+
+  const resize = () => {
+    W = Math.max(1, mount.clientWidth); H = Math.max(1, mount.clientHeight);
+    renderer.setSize(W, H, false);
+    coSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  };
+  new ResizeObserver(resize).observe(mount); resize();
+
+  let visible = true;
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(section);
+
+  /* loop */
+  let theta = null, last = performance.now(), t0 = null, lastHead = -1, lastName = '';
+  function loop(now){
+    requestAnimationFrame(loop);
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (!visible) return;
+    const { p, f, r } = progress();
+    applyHead(f);
+
+    // intro: one full 360° turn when the page loads
+    let intro = 0, introDone = true;
+    if (!reduced) {
+      if (t0 === null) t0 = now + 250;
+      const t = clamp((now - t0) / 2800);
+      intro = TAU * Math.pow(1 - t, 3); introDone = t >= 1;
+    }
+    // drag inertia; after a pause the rig eases back to the scroll-defined heading
+    if (!dragging) {
+      dragT += vel; vel *= 0.92; if (Math.abs(vel) < 1e-4) vel = 0;
+      if (vel === 0 && now - lastDrag > 1400) {
+        if (p > 0.03) {
+          const k = Math.round(dragT / TAU);
+          if (k) { dragT -= k * TAU; if (theta !== null) theta -= k * TAU; }
+          dragT += -dragT * Math.min(1, dt * 1.6);
+        } else if (introDone && !reduced && now - lastDrag > 4000) {
+          dragT -= dt * 0.16;   // idle turntable drift at the top of the page
+        }
+      }
+    }
+    const target = -r * TAU + dragT + intro;
+    theta = theta === null ? target : theta + (target - theta) * Math.min(1, dt * 7);
+
+    turn.rotation.y = theta;
+    frameCamera(theta, W, H, f);
+    renderer.render(scene, camera);
+    updateCallouts(W, H, f);
+
+    // HUD
+    const hdg = (((-theta * 180 / Math.PI) % 360) + 360) % 360;
+    const hRound = Math.round(hdg) % 360;
+    if (hRound !== lastHead) { lastHead = hRound; hudHeading.textContent = String(hRound).padStart(3, '0') + '°'; }
+    const name = NAMES[Math.round(hdg / 45) % 8];
+    if (name !== lastName) { lastName = name; hudView.textContent = name; }
+    hudBar.style.width = (r * 100).toFixed(2) + '%';
+    viewBtns.forEach((b, i) => { const vh = VIEWS[i][1] * 360; const dd = Math.abs(((hdg - vh + 540) % 360) - 180); b.classList.toggle('on', dd < 18); });
+  }
+  applyHead(progress().f);
+  requestAnimationFrame(loop);
+})();
+
+/* ---------- Counters ---------- */
+function countUp(el, to, dec = 0, dur = 1400){
+  if (reduced) { el.textContent = fmt(to, dec); return; }
+  const from = parseFloat(String(el.textContent).replace(/,/g, '')) || 0, t0 = performance.now();
+  const step = now => {
+    const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 4);
+    el.textContent = fmt(from + (to - from) * e, dec);
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+(function counters(){
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target; countUp(el, parseFloat(el.dataset.count), parseInt(el.dataset.dec || 0));
+    io.unobserve(el);
+  }), { threshold: .5 });
+  $$('[data-count]').forEach(el => io.observe(el));
+})();
+
+/* ---------- Reveal ---------- */
+(function reveal(){
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+  $$('.reveal').forEach((el, i) => { el.style.transitionDelay = (el.parentElement.classList.contains('svc-list') || el.parentElement.classList.contains('quotes') ? (i % 5) * 60 : 0) + 'ms'; io.observe(el); });
+})();
+
+/* ---------- Live loads ticker ---------- */
+(function live(){
+  const el = $('#liveLoads'); let v = 1847;
+  setInterval(() => { v += Math.round((Math.random() - .45) * 6); el.textContent = fmt(v); }, 3000);
+})();
+
+/* ---------- Blueprint configurator ---------- */
+(function blueprint(){
+  const C = {
+    van: { name: '53′ dry van', len: 640, lenTxt: '53′ 0″', desc: 'Our workhorse for palletized and floor-loaded freight. Swing doors, logistics posts every 24 inches.', rev: 'Rev. C',
+      specs: [['Payload', 45000, 'lb'], ['Cargo space', 3489, 'ft³'], ['Pallet positions', 26, ''], ['Tractor range', 1150, 'mi'], ['Telematics ping', 15, 's'], ['Sensors', 'door, load, tires', '']],
+      sys: ['door sensor', 'load-weight cells', 'TPMS x8'] },
+    reefer: { name: '53′ reefer', len: 612, lenTxt: '53′ 0″', unit: true, desc: 'Insulated trailer with a diesel-electric cooling unit. Setpoint and air temperature logged every minute.', rev: 'Rev. F',
+      specs: [['Payload', 43500, 'lb'], ['Cargo space', 3300, 'ft³'], ['Temperature range', '−20 to 70', '°F'], ['Tractor range', 1080, 'mi'], ['Telematics ping', 10, 's'], ['Sensors', '3 temp probes, door', '']],
+      sys: ['reefer unit', 'temp probe array', 'door sensor'] },
+    flat: { name: '48′ flatbed', len: 580, lenTxt: '48′ 0″', flat: true, desc: 'Open deck for steel, lumber and machinery. Winch tracks on both sides, 16 strap positions.', rev: 'Rev. B',
+      specs: [['Payload', 48000, 'lb'], ['Deck size', '48 × 8.5', 'ft'], ['Strap positions', 16, ''], ['Tractor range', 1150, 'mi'], ['Telematics ping', 15, 's'], ['Sensors', 'strap tension, tires', '']],
+      sys: ['strap tension x16', 'load-weight cells', 'TPMS x8'] }
+  };
+  const svg = $('#bpSvg'), specs = $('#bpSpecs'), sys = $('#bpSys');
+  let n = 0;
+  const D = (i) => `style="animation-delay:${(i * 0.05).toFixed(2)}s"`;
+
+  function draw(key){
+    const c = C[key]; const X0 = 50, X1 = X0 + c.len, G = 320, TOP = 80, BOT = 258;
+    let i = 0, s = '';
+    const el = (tag, attrs, cls = 's') => `<${tag} class="${cls} draw" pathLength="1" ${attrs} ${D(i++)}/>`;
+    // ground
+    s += el('line', `x1="10" y1="${G}" x2="810" y2="${G}"`, 's2');
+    if (!c.flat) {
+      s += `<rect class="fillw fadein" x="${X0}" y="${TOP}" width="${c.len}" height="${BOT - TOP}" style="animation-delay:.6s"/>`;
+      s += el('rect', `x="${X0}" y="${TOP}" width="${c.len}" height="${BOT - TOP}" rx="3"`);
+      for (let x = X0 + 32; x < X1 - 10; x += 32) s += el('line', `x1="${x}" y1="${TOP + 6}" x2="${x}" y2="${BOT - 6}"`, 's2');
+      s += el('line', `x1="${X0 + 8}" y1="${TOP}" x2="${X0 + 8}" y2="${BOT}"`);
+      if (c.unit) {
+        s += el('rect', `x="${X1}" y="${TOP + 22}" width="30" height="118" rx="4"`);
+        for (let y = TOP + 36; y < TOP + 130; y += 12) s += el('line', `x1="${X1 + 6}" y1="${y}" x2="${X1 + 24}" y2="${y}"`, 's2');
+        s += `<text x="${X1 + 15}" y="${TOP + 14}" text-anchor="middle" class="fadein" style="animation-delay:.9s">unit</text>`;
+      }
+    } else {
+      s += `<rect class="fillw fadein" x="${X0}" y="${BOT - 16}" width="${c.len}" height="16" style="animation-delay:.6s"/>`;
+      s += el('rect', `x="${X0}" y="${BOT - 16}" width="${c.len}" height="16" rx="2"`);
+      // cargo: steel coils on cradles + a crate
+      [[X0 + 120, 34], [X0 + 250, 34], [X0 + 380, 34]].forEach(([cx, r]) => {
+        s += el('circle', `cx="${cx}" cy="${BOT - 16 - r}" r="${r}"`);
+        s += el('circle', `cx="${cx}" cy="${BOT - 16 - r}" r="${r * .38}"`, 's2');
+        s += el('path', `d="M${cx - r} ${BOT - 16 - r} L${cx} ${BOT - 16 - 2 * r - 14} L${cx + r} ${BOT - 16 - r}"`, 's2');
+      });
+      s += el('rect', `x="${X0 + 450}" y="${BOT - 16 - 70}" width="100" height="70"`);
+      s += el('path', `d="M${X0 + 450} ${BOT - 86} L${X0 + 550} ${BOT - 16} M${X0 + 550} ${BOT - 86} L${X0 + 450} ${BOT - 16}"`, 's2');
+    }
+    // subframe, landing gear, kingpin
+    s += el('line', `x1="${X0 + 20}" y1="${BOT + 8}" x2="${X1 - 20}" y2="${BOT + 8}"`);
+    const LG = X1 - 110, KP = X1 - 36;
+    s += el('path', `d="M${LG} ${BOT + 8} V${G - 4} M${LG - 12} ${G - 4} H${LG + 12}"`);
+    s += el('circle', `cx="${KP}" cy="${BOT + 12}" r="5"`);
+    s += el('path', `d="M${KP - 12} ${BOT + 12} H${KP + 12} M${KP} ${BOT} V${BOT + 24}"`, 's2');
+    // wheels
+    const A1 = X0 + 70, A2 = X0 + 124;
+    [A1, A2].forEach(cx => { s += el('circle', `cx="${cx}" cy="${G - 27}" r="27"`); s += el('circle', `cx="${cx}" cy="${G - 27}" r="11"`, 's2'); });
+    // dimensions
+    const endX = c.unit ? X1 + 30 : X1;
+    const dimY = 40;
+    s += el('path', `d="M${X0} ${dimY - 8} V${dimY + 8} M${endX} ${dimY - 8} V${dimY + 8} M${X0} ${dimY} H${endX}"`, 'dim');
+    s += el('path', `d="M${X0 + 8} ${dimY - 4} L${X0} ${dimY} L${X0 + 8} ${dimY + 4} M${endX - 8} ${dimY - 4} L${endX} ${dimY} L${endX - 8} ${dimY + 4}"`, 'dim');
+    s += `<rect x="${(X0 + endX) / 2 - 38}" y="${dimY - 10}" width="76" height="20" fill="var(--bg)" class="fadein" style="animation-delay:.5s"/>`;
+    s += `<text class="hl fadein" x="${(X0 + endX) / 2}" y="${dimY + 4}" text-anchor="middle" style="animation-delay:.5s">${c.lenTxt}</text>`;
+    const hx = Math.min(endX + 42, 790), topY = c.flat ? BOT - 16 : TOP;
+    s += el('path', `d="M${hx - 8} ${topY} H${hx + 8} M${hx - 8} ${G} H${hx + 8} M${hx} ${topY} V${G}"`, 'dim');
+    s += `<text class="hl fadein" x="${hx + 6}" y="${(topY + G) / 2}" transform="rotate(-90 ${hx + 6} ${(topY + G) / 2})" text-anchor="middle" dy="-8" style="animation-delay:.6s">${c.flat ? '5′ 0″ deck' : "13′ 6″"}</text>`;
+    const by = 350;
+    s += el('path', `d="M${A1} ${by - 7} V${by + 7} M${A2} ${by - 7} V${by + 7} M${KP} ${by - 7} V${by + 7} M${A1} ${by} H${KP}"`, 'dim');
+    s += `<text class="fadein" x="${(A1 + A2) / 2}" y="${by - 10}" text-anchor="middle" style="animation-delay:.7s">4′ 1″</text>`;
+    s += `<text class="fadein" x="${(A2 + KP) / 2}" y="${by - 10}" text-anchor="middle" style="animation-delay:.7s">kingpin to rear axle ${c.flat ? "37′ 6″" : "40′ 0″"}</text>`;
+    s += `<text class="fadein" x="${KP}" y="${BOT + 44}" text-anchor="middle" style="animation-delay:.8s">kingpin</text>`;
+    s += `<text class="fadein" x="${LG}" y="${G + 16}" text-anchor="middle" style="animation-delay:.8s">landing gear</text>`;
+    svg.innerHTML = s;
+  }
+
+  function render(key){
+    const c = C[key]; n++;
+    $('#bpName').textContent = c.name; $('#bpDesc').textContent = c.desc; $('#bpRev').textContent = c.rev;
+    specs.innerHTML = c.specs.map(([k, v, u], i) =>
+      `<div class="spec"><dt>${k}</dt><dd><span data-v="${typeof v === 'number' ? v : ''}">${typeof v === 'number' ? '0' : v}</span>${u ? `<small>${u}</small>` : ''}</dd></div>`).join('');
+    $$('[data-v]', specs).forEach(el => { if (el.dataset.v) countUp(el, +el.dataset.v, 0, 900); });
+    draw(key);
+    // system check log
+    const lines = [`> load profile ${c.name}`, ...c.sys.map(x => `> ${x}`), '> all systems nominal'];
+    sys.innerHTML = ''; const run = n;
+    lines.forEach((l, i) => setTimeout(() => {
+      if (run !== n) return;
+      const ok = i > 0 && i < lines.length - 1 ? ' <span class="ok">OK</span>' : (i === lines.length - 1 ? '' : '');
+      sys.insertAdjacentHTML('beforeend', `<div${i === lines.length - 1 ? ' class="ok"' : ''}>${l}${ok}</div>`);
+    }, reduced ? 0 : 180 * i + 200));
+  }
+
+  const tabs = $$('.tab');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.setAttribute('aria-selected', String(x === t)));
+    render(t.dataset.cfg);
+  }));
+  $('.tabs').addEventListener('keydown', e => {
+    const i = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true');
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const j = (i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+      tabs[j].focus(); tabs[j].click();
+    }
+  });
+  // draw when it scrolls into view so the stroke animation is seen
+  const io = new IntersectionObserver(es => { if (es[0].isIntersecting) { render('van'); io.disconnect(); } }, { threshold: .3 });
+  io.observe(svg);
+})();
+
+/* ---------- Hotspots ---------- */
+(function hotspots(){
+  $('#truckHs').innerHTML = truckSVG('solid', 'h');
+  const H = [
+    { x: 94.5, y: 50, tag: 'Sensors', title: 'Autonomous driving',
+      text: 'Lidar, radar and eight cameras in the cab front let the truck drive itself hub to hub on mapped interstate lanes. A licensed driver stays on board for city streets and docks.',
+      m: [['Sensor range', '250 m', 80], ['Share of miles driven hands-off', '62%', 62], ['Disengagements', '0.4 per 1k mi', 12]] },
+    { x: 71, y: 10, tag: 'Telematics', title: 'Smart fleet tracking',
+      text: 'A roof-mounted modem reports position, speed and load every 15 seconds over cellular, and falls back to satellite in dead zones. That feed drives the ETAs in your portal.',
+      m: [['Position update', 'every 15 s', 90], ['Network coverage', '99.6%', 99], ['ETA accuracy', '± 9 min', 85]] },
+    { x: 75, y: 65.5, tag: 'Powertrain', title: 'Eco-fuel performance',
+      text: 'Tractors run on renewable natural gas, battery-electric or high-efficiency diesel depending on the lane. Predictive cruise uses route grade data to cut fuel burn on hills.',
+      m: [['Fuel economy (diesel)', '9.4 mpg', 72], ['CO₂ vs. our 2020 fleet', '−27%', 27], ['Engine idle time', '3.1%', 8]] },
+    { x: 30, y: 36, tag: 'Cargo', title: 'Cargo sensing',
+      text: 'Load cells, door switches and temperature probes inside the trailer tell you when your freight was opened, shifted or warmed, with a timestamp and GPS point for each event.',
+      m: [['Door events', 'logged live', 100], ['Shock alert threshold', '2.5 g', 50], ['Temperature accuracy', '± 0.5 °F', 92]] }
+  ];
+  const track = $('#hsTrack'), body = $('#hsBody'), navEl = $('#hsNav');
+  const plus = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg>';
+  const btns = H.map((h, i) => {
+    const b = document.createElement('button');
+    b.className = 'hotspot'; b.style.left = h.x + '%'; b.style.top = h.y + '%';
+    b.setAttribute('aria-label', h.title); b.innerHTML = plus;
+    b.addEventListener('click', () => show(i));
+    const tag = document.createElement('span'); tag.className = 'hs-tag'; tag.style.left = h.x + '%'; tag.style.top = h.y + '%'; tag.textContent = h.tag;
+    track.append(tag, b);
+    const d = document.createElement('button'); d.setAttribute('aria-label', h.title); d.addEventListener('click', () => show(i)); navEl.append(d);
+    return b;
+  });
+  let cur = -1;
+  function show(i){
+    if (i === cur) return; cur = i; const h = H[i];
+    btns.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+    $$('button', navEl).forEach((d, j) => d.setAttribute('aria-current', String(j === i)));
+    body.innerHTML = `<div class="swap">
+      <span class="tech">System ${i + 1} of ${H.length}</span>
+      <h3 class="h3" style="margin-top:10px; font-size:1.55rem;">${h.title}</h3>
+      <p style="margin:12px 0 22px; color:var(--ink-2); font-size:.96rem;">${h.text}</p>
+      ${h.m.map(([k, v, p]) => `<div style="margin-bottom:14px;"><div style="display:flex; justify-content:space-between; gap:12px;" class="mono"><span style="color:var(--muted); font-size:.78rem;">${k}</span><span style="font-size:.82rem; font-weight:500;">${v}</span></div><div class="meter"><i data-w="${p}"></i></div></div>`).join('')}
+    </div>`;
+    requestAnimationFrame(() => requestAnimationFrame(() => $$('.meter i', body).forEach(m => m.style.width = m.dataset.w + '%')));
+  }
+  show(0);
+})();
+
+/* ---------- Network map ---------- */
+(function network(){
+  const svg = $('#mapSvg'), W = 1000, H = 400;
+  const LAT_TOP = 80, LAT_BOT = -58;
+  const P = (lon, lat) => [(lon + 180) / 360 * W, (LAT_TOP - lat) / (LAT_TOP - LAT_BOT) * H];
+  const land = [
+    [[-168,66],[-162,70],[-140,70],[-125,70],[-95,72],[-80,68],[-62,60],[-55,52],[-66,45],[-70,42],[-76,35],[-81,30],[-80,25],[-84,30],[-90,29],[-97,26],[-97,20],[-92,18],[-87,21],[-88,15],[-83,9],[-78,8],[-80,7],[-86,11],[-92,14],[-105,20],[-112,27],[-117,32],[-124,40],[-124,48],[-130,55],[-140,59],[-152,58],[-165,60]],
+    [[-55,60],[-45,60],[-20,70],[-18,80],[-60,82],[-72,77],[-56,68]],
+    [[-80,74],[-65,70],[-90,68],[-110,72],[-120,76],[-95,80]],
+    [[-78,8],[-60,10],[-50,0],[-35,-6],[-38,-15],[-48,-26],[-58,-38],[-65,-42],[-68,-52],[-72,-52],[-75,-45],[-72,-30],[-71,-18],[-76,-14],[-81,-5],[-80,1]],
+    [[-10,36],[-9,43],[-2,44],[-5,48],[2,51],[8,54],[10,58],[5,62],[12,66],[20,70],[30,71],[45,68],[60,70],[70,73],[80,73],[100,77],[115,74],[130,72],[142,73],[160,70],[180,68],[180,64],[170,60],[162,56],[156,51],[140,54],[135,44],[129,35],[122,31],[122,25],[110,21],[108,16],[109,11],[104,9],[100,13],[99,8],[103,1],[98,8],[97,16],[92,21],[88,22],[80,15],[77,8],[72,20],[67,24],[57,25],[56,26],[52,24],[56,20],[52,16],[44,13],[40,20],[35,28],[34,31],[36,36],[28,36],[26,40],[22,37],[19,41],[16,39],[12,44],[8,44],[3,43],[-1,37],[-6,36]],
+    [[-17,21],[-16,12],[-12,7],[-7,4],[0,5],[9,4],[9,-1],[13,-5],[12,-17],[15,-27],[18,-34],[26,-34],[33,-26],[35,-20],[40,-15],[40,-5],[51,11],[43,12],[38,18],[33,28],[32,31],[20,31],[10,37],[0,36],[-6,35],[-10,30]],
+    [[114,-22],[122,-18],[130,-12],[137,-12],[142,-11],[146,-19],[153,-25],[151,-34],[146,-39],[140,-37],[135,-35],[129,-32],[115,-34]],
+    [[-6,50],[1,51],[2,53],[-2,56],[-3,59],[-6,57],[-5,54]],
+    [[130,31],[135,34],[141,36],[142,40],[142,45],[140,43],[139,38],[133,34]],
+    [[109,2],[117,7],[119,1],[116,-4],[110,-3]], [[95,5],[99,3],[106,-6],[102,-4]], [[106,-6],[115,-8],[114,-9],[106,-7.5]],
+    [[131,-1],[141,-2],[150,-10],[141,-9]], [[44,-25],[47,-25],[50,-15],[48,-13],[44,-17]],
+    [[166,-46],[172,-41],[174,-37],[178,-38],[174,-42],[169,-47]], [[-24,64],[-14,65],[-16,66],[-22,66]], [[120,18],[122,18],[125,10],[122,7],[119,10]]
+  ];
+  const inside = (pt, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if (((yi > pt[1]) !== (yj > pt[1])) && (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi)) c = !c; } return c; };
+  let dots = '';
+  const step = 9;
+  for (let y = step / 2; y < H; y += step) for (let x = step / 2; x < W; x += step) {
+    const lon = x / W * 360 - 180, lat = LAT_TOP - y / H * (LAT_TOP - LAT_BOT);
+    if (land.some(p => inside([lon, lat], p))) dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.7"/>`;
+  }
+  const hubs = {
+    CHI: ['Chicago', -87.6, 41.9, 'am'], LAX: ['Los Angeles', -118.2, 34, 'am'], HOU: ['Houston', -95.4, 29.8, 'am'], YYZ: ['Toronto', -79.4, 43.7, 'am'],
+    MEX: ['Mexico City', -99.1, 19.4, 'am'], GRU: ['São Paulo', -46.6, -23.5, 'am'], RTM: ['Rotterdam', 4.5, 51.9, 'emea'], FRA: ['Frankfurt', 8.7, 50.1, 'emea'],
+    MAD: ['Madrid', -3.7, 40.4, 'emea'], IST: ['Istanbul', 29, 41, 'emea'], DXB: ['Dubai', 55.3, 25.2, 'emea'], LOS: ['Lagos', 3.4, 6.5, 'emea'],
+    JNB: ['Johannesburg', 28, -26.2, 'emea'], BOM: ['Mumbai', 72.9, 19, 'apac'], SIN: ['Singapore', 103.8, 1.3, 'apac'], SHA: ['Shanghai', 121.5, 31.2, 'apac'],
+    TYO: ['Tokyo', 139.7, 35.7, 'apac'], SYD: ['Sydney', 151.2, -33.9, 'apac']
+  };
+  const routes = [
+    ['CHI','LAX','am'],['CHI','YYZ','am'],['CHI','HOU','am'],['HOU','MEX','am'],['LAX','HOU','am'],['HOU','GRU','am'],
+    ['RTM','FRA','emea'],['MAD','RTM','emea'],['FRA','IST','emea'],['IST','DXB','emea'],['LOS','MAD','emea'],['JNB','LOS','emea'],['DXB','JNB','emea'],
+    ['DXB','BOM','apac'],['BOM','SIN','apac'],['SIN','SHA','apac'],['SHA','TYO','apac'],['SIN','SYD','apac'],['FRA','SHA','apac'],
+    ['RTM','CHI','emea'],['LAX','TYO','apac']
+  ];
+  const labelSet = new Set(['CHI','LAX','HOU','MEX','GRU','RTM','IST','DXB','JNB','BOM','SIN','SHA','SYD','LOS']);
+  let rs = '', hs = '', ps = '';
+  routes.forEach(([a, b, reg], i) => {
+    const [x1, y1] = P(hubs[a][1], hubs[a][2]), [x2, y2] = P(hubs[b][1], hubs[b][2]);
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, d = Math.hypot(x2 - x1, y2 - y1);
+    const cx = mx, cy = my - d * 0.22;
+    rs += `<path class="route" data-reg="${reg}" id="r${i}" d="M${x1.toFixed(1)} ${y1.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}" style="animation-delay:-${(i * .13).toFixed(2)}s"/>`;
+    ps += `<circle class="pkt" data-reg="${reg}" r="2.6"/>`;
+  });
+  Object.entries(hubs).forEach(([k, [name, lon, lat, reg]]) => {
+    const [x, y] = P(lon, lat);
+    hs += `<g class="hub" data-reg="${reg}"><title>${name}</title><circle class="halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8"/><circle class="core" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6"/>${labelSet.has(k) ? `<text x="${(x + 7).toFixed(1)}" y="${(y - 6).toFixed(1)}">${k}</text>` : ''}</g>`;
+  });
+  svg.innerHTML = `<g class="land">${dots}</g><g>${rs}</g><g>${ps}</g><g>${hs}</g>`;
+
+  const paths = $$('.route', svg), pkts = $$('.pkt', svg);
+  const lens = paths.map(p => p.getTotalLength());
+  const phase = paths.map(() => Math.random()), speed = paths.map(() => 0.05 + Math.random() * 0.05);
+  let region = 'all', running = false, last = 0;
+  const frame = now => {
+    if (!running) return;
+    const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now;
+    paths.forEach((p, i) => {
+      phase[i] = (phase[i] + dt * speed[i] * (400 / lens[i])) % 1;
+      const pt = p.getPointAtLength(phase[i] * lens[i]);
+      pkts[i].setAttribute('cx', pt.x.toFixed(1)); pkts[i].setAttribute('cy', pt.y.toFixed(1));
+    });
+    requestAnimationFrame(frame);
+  };
+  if (reduced) paths.forEach((p, i) => { const pt = p.getPointAtLength(lens[i] * .5); pkts[i].setAttribute('cx', pt.x); pkts[i].setAttribute('cy', pt.y); });
+  else new IntersectionObserver(es => { running = es[0].isIntersecting; if (running) { last = performance.now(); requestAnimationFrame(frame); } }).observe(svg);
+
+  const base = { all: [1847, 38420, 41], am: [912, 19880, 36], emea: [521, 10310, 47], apac: [414, 8230, 44] };
+  const lanes = r => routes.filter(x => r === 'all' || x[2] === r).length;
+  function applyRegion(r){
+    region = r;
+    $$('.chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.region === r)));
+    [...paths, ...pkts, ...$$('.hub', svg)].forEach(el => {
+      const on = r === 'all' || el.dataset.reg === r;
+      el.classList.toggle('ghost', !on);
+      if (el.classList.contains('pkt')) el.style.opacity = on ? 1 : .1;
+    });
+    countUp($('#nLanes'), lanes(r), 0, 600);
+    countUp($('#nLoads'), base[r][0], 0, 800);
+    countUp($('#nTons'), base[r][1], 0, 800);
+    countUp($('#nDwell'), base[r][2], 0, 800);
+  }
+  $$('.chip').forEach(c => c.addEventListener('click', () => applyRegion(c.dataset.region)));
+  new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { applyRegion('all'); o.disconnect(); } }, { threshold: .3 }).observe(svg);
+
+  // live feed + jitter
+  const feed = $('#feed');
+  const events = () => {
+    const pool = routes.filter(x => region === 'all' || x[2] === region);
+    const [a, b] = pool[Math.floor(Math.random() * pool.length)];
+    const unit = 4000 + Math.floor(Math.random() * 900);
+    const kinds = [`departed ${hubs[a][0]} for ${hubs[b][0]}`, `arrived ${hubs[b][0]}, ${Math.floor(Math.random() * 18) + 2} min early`, `checkpoint ${hubs[a][0]} corridor, on schedule`];
+    const t = new Date().toISOString().slice(11, 19);
+    feed.innerHTML = `<b>${t} UTC</b>&nbsp;&nbsp;Unit ${unit} ${kinds[Math.floor(Math.random() * kinds.length)]}`;
+  };
+  events(); setInterval(() => {
+    events();
+    const b = base[region];
+    const loads = $('#nLoads'); if (loads.textContent !== '0') loads.textContent = fmt(b[0] + Math.round((Math.random() - .5) * 12));
+  }, 3500);
+})();
+
+/* ---------- Quote form ---------- */
+(function form(){
+  const f = $('#quoteForm'), err = $('#formErr');
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    const o = $('#fOrigin'), d = $('#fDest'), m = $('#fEmail');
+    [o, d, m].forEach(x => x.setAttribute('aria-invalid', 'false'));
+    const miss = [];
+    if (!o.value.trim()) { miss.push('pickup city'); o.setAttribute('aria-invalid', 'true'); }
+    if (!d.value.trim()) { miss.push('delivery city'); d.setAttribute('aria-invalid', 'true'); }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.value.trim())) { miss.push('a valid work email'); m.setAttribute('aria-invalid', 'true'); }
+    if (miss.length) { err.textContent = 'Add ' + miss.join(', ') + ' to send the request.'; f.querySelector('[aria-invalid="true"]').focus(); return; }
+    err.textContent = '';
+    const esc = s => s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    $('#formWrap').innerHTML = `<div class="done swap" tabindex="-1" id="doneMsg">
+      <span class="tech" style="color:var(--accent);">RFQ-${Math.floor(10000 + Math.random() * 89999)} / received</span>
+      <h3 class="h3" style="margin-top:12px; font-size:1.5rem;">Quote request sent</h3>
+      <p style="margin:12px 0 0; color:color-mix(in srgb, var(--bg) 75%, transparent);">${esc(o.value.trim())} to ${esc(d.value.trim())}, ${esc($('#fType').value)}. A freight planner will reply to ${esc(m.value.trim())} within 2 business hours.</p>
+    </div>`;
+    $('#doneMsg').focus();
+  });
+})();
+})();
+</script>
+</body>
+</html>
